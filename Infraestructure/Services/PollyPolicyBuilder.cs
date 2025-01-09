@@ -1,57 +1,35 @@
 ﻿using Polly;
-using Polly.Retry;
-using Polly.CircuitBreaker;
-using Microsoft.Extensions.Logging;
+using Polly.Registry;
 
 namespace StandardAPI.Infraestructure.Services
 {
-    public class PollyPolicyBuilder
+    public class ResilientPolicyExecutor
     {
-        public static AsyncRetryPolicy GetRetryPolicy(int retryCount, ILogger logger)
+        private readonly IPolicyRegistry<string> _policyRegistry;
+
+        public ResilientPolicyExecutor(IPolicyRegistry<string> policyRegistry)
         {
-            return Policy
-                .Handle<Exception>()
-                .WaitAndRetryAsync(
-                    retryCount,
-                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    (exception, timeSpan, retryCount, context) =>
-                    {
-                        logger.LogWarning(
-                            exception,
-                            "Retry {RetryCount} after {Delay} due to {ExceptionMessage}",
-                            retryCount,
-                            timeSpan,
-                            exception.Message);
-                    });
+            _policyRegistry = policyRegistry;
         }
 
-        public static AsyncCircuitBreakerPolicy GetCircuitBreakerPolicy(
-            int exceptionsAllowedBeforeBreaking,
-            TimeSpan breakDuration,
-            ILogger logger)
+        public async Task<T> ExecuteAsync<T>(Func<Task<T>> action, string policyKey)
         {
-            return Policy
-                .Handle<Exception>()
-                .CircuitBreakerAsync(
-                    exceptionsAllowedBeforeBreaking: exceptionsAllowedBeforeBreaking,
-                    durationOfBreak: breakDuration,
-                    onBreak: (exception, duration) =>
-                    {
-                        logger.LogError(
-                            exception,
-                            "Circuit breaker triggered after {ExceptionsAllowedBeforeBreaking} exceptions. Circuit will remain open for {Duration}. Reason: {ExceptionMessage}",
-                            exceptionsAllowedBeforeBreaking,
-                            duration,
-                            exception.Message);
-                    },
-                    onReset: () =>
-                    {
-                        logger.LogInformation("Circuit breaker reset. Operations can now proceed.");
-                    },
-                    onHalfOpen: () =>
-                    {
-                        logger.LogInformation("Circuit breaker is half-open. Testing operation.");
-                    });
+            if (!_policyRegistry.TryGet<IAsyncPolicy<T>>(policyKey, out var policy))
+            {
+                throw new InvalidOperationException($"Policy with key '{policyKey}' not found.");
+            }
+
+            return await policy.ExecuteAsync(action);
+        }
+
+        public async Task ExecuteAsync(Func<Task> action, string policyKey)
+        {
+            if (!_policyRegistry.TryGet<IAsyncPolicy>(policyKey, out var policy))
+            {
+                throw new InvalidOperationException($"Policy with key '{policyKey}' not found.");
+            }
+
+            await policy.ExecuteAsync(action);
         }
     }
 }

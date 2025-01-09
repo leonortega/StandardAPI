@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Polly.CircuitBreaker;
+using Polly;
 using StackExchange.Redis;
 using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Persistence;
@@ -14,8 +16,6 @@ namespace StandardAPI.Infraestructure.Extensions
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddScoped<IProductRepository, ProductRepository>();
-
             var dbConnectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddSingleton(new DatabaseConnectionFactory(dbConnectionString!));
 
@@ -26,21 +26,9 @@ namespace StandardAPI.Infraestructure.Extensions
             services.AddSingleton<IConnectionMultiplexer>(sp => redisConnection);
             services.AddSingleton(sp => new RedisCacheService(redisConnection, redisSettings.DefaultCacheExpiryMinutes));
 
-            services.AddSingleton(serviceProvider =>
-            {
-                var logger = serviceProvider.GetRequiredService<ILogger<PollyPolicyBuilder>>();
-                var pollySettings = new PollySettings();
-                configuration.GetSection("Polly").Bind(pollySettings);
+            services.AddPollyPolicies(configuration);
 
-                return new
-                {
-                    RetryPolicy = PollyPolicyBuilder.GetRetryPolicy(pollySettings.RetryCount, logger),
-                    CircuitBreakerPolicy = PollyPolicyBuilder.GetCircuitBreakerPolicy(
-                        pollySettings.CircuitBreakerExceptionsAllowedBeforeBreaking,
-                        pollySettings.CircuitBreakerDuration,
-                        logger)
-                };
-            });
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             return services;
         }

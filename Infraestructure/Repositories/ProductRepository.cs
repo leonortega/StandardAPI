@@ -1,7 +1,6 @@
 ﻿using Dapper;
+using Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
-using Polly.CircuitBreaker;
-using Polly.Retry;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Persistence;
@@ -12,12 +11,11 @@ namespace StandardAPI.Infraestructure.Repositories
     public class ProductRepository : BaseRepository, IProductRepository
     {
         public ProductRepository(
-            DatabaseConnectionFactory connectionFactory,
-            AsyncRetryPolicy retryPolicy,
-            AsyncCircuitBreakerPolicy circuitBreakerPolicy,
+            ResilientPolicyExecutor policyExecutor,
             RedisCacheService cacheService,
+            DatabaseConnectionFactory connectionFactory,
             ILogger<ProductRepository> logger)
-            : base(connectionFactory, retryPolicy, circuitBreakerPolicy, cacheService, logger)
+            : base(policyExecutor, cacheService, connectionFactory, logger)
         {
         }
 
