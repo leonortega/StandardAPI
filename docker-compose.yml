@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # webapi:
+    # build:
+      # context: .
+      # dockerfile: Dockerfile
+    # ports:
+      # - "5000:80" # Map localhost:5000 to container's port 80
+    # environment:
+      # - ASPNETCORE_ENVIRONMENT=Development
+      # - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StandardAPIDB;User Id=sa;Password=Mvpqmq100v!;
+      # - Redis__ConnectionString=redis:6379
+    # depends_on:
+      # - sqlserver
+      # - redis
+    # volumes:
+      # - logs:/app/logs # Mount a volume for logs
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Mvpqmq100v!
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+
+volumes:
+  logs: # Volume for logs
+  redisdata: # Volume for Redis data
+  sqlserverdata: # Volume for SQL Server data
