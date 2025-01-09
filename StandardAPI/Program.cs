@@ -11,16 +11,15 @@ builder.Host.UseSerilog((context, config) =>
     config.ReadFrom.Configuration(context.Configuration);
 });
 
+
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
-var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
-builder.Services.AddInfrastructureServices(builder.Configuration, logger);
 
 if (app.Environment.IsDevelopment())
 {
