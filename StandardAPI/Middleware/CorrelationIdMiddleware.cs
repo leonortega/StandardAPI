@@ -29,13 +29,9 @@
                 return Task.CompletedTask;
             });
 
-            // Add Correlation ID to the log context
-            using (_logger.BeginScope("{CorrelationId}", correlationId!))
-            {
-                _logger.LogInformation("Handling request with Correlation ID: {CorrelationId}", correlationId!);
-                await _next(context);
-                _logger.LogInformation("Completed request with Correlation ID: {CorrelationId}", correlationId!);
-            }
+            _logger.LogInformation("Handling request");
+            await _next(context);
+            _logger.LogInformation("Completed request");
         }
     }
 }

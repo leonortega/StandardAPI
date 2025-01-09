@@ -2,9 +2,16 @@
 
 namespace StandardAPI.API.Middleware
 {
-    public class ErrorHandlingMiddleware(RequestDelegate next, ILogger log)
+    public class ErrorHandlingMiddleware
     {
-        private readonly RequestDelegate _next = next;
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorHandlingMiddleware> _log;
+
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> log)
+        {
+            _next = next;
+            _log = log;
+        }
 
         public async Task Invoke(HttpContext context)
         {
@@ -14,7 +21,7 @@ namespace StandardAPI.API.Middleware
             }
             catch (Exception ex)
             {
-                log.LogError(ex, "An unexpected error occurred.");
+                _log.LogError(ex, "An unexpected error occurred.");
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = 500;
 

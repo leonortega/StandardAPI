@@ -21,6 +21,9 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 
+// Enable Serilog request logging
+app.UseSerilogRequestLogging();
+
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
@@ -30,9 +33,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
 }
-
-// Enable Serilog request logging
-app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
