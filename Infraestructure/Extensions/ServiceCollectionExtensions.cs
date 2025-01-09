@@ -1,10 +1,10 @@
-﻿using Infrastructure.Repositories;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Persistence;
+using StandardAPI.Infraestructure.Repositories;
 using StandardAPI.Infraestructure.Services;
 using StandardAPI.Infraestructure.Settings;
 
@@ -19,14 +19,12 @@ namespace StandardAPI.Infraestructure.Extensions
             var dbConnectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddSingleton(new DatabaseConnectionFactory(dbConnectionString!));
 
-            var redisConfig = configuration.GetSection("Redis");
-            var redisConnectionString = redisConfig["ConnectionString"];
-            var defaultExpiryString = redisConfig["DefaultCacheExpiryMinutes"];
-            var defaultExpiry = defaultExpiryString != null ? int.Parse(defaultExpiryString) : 30;
+            var redisSettings = new RedisSettings();
+            configuration.GetSection("Redis").Bind(redisSettings);
 
-            var redisConnection = ConnectionMultiplexer.Connect(redisConnectionString!);
+            var redisConnection = ConnectionMultiplexer.Connect(redisSettings.ConnectionString!);
             services.AddSingleton<IConnectionMultiplexer>(sp => redisConnection);
-            services.AddSingleton(sp => new RedisCacheService(redisConnection, defaultExpiry));
+            services.AddSingleton(sp => new RedisCacheService(redisConnection, redisSettings.DefaultCacheExpiryMinutes));
 
             services.AddSingleton(serviceProvider =>
             {

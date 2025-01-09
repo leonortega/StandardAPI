@@ -7,7 +7,7 @@ using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Persistence;
 using StandardAPI.Infraestructure.Services;
 
-namespace Infrastructure.Repositories
+namespace StandardAPI.Infraestructure.Repositories
 {
     public class ProductRepository : BaseRepository, IProductRepository
     {

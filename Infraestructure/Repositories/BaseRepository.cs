@@ -6,7 +6,7 @@ using Polly.Wrap;
 using StandardAPI.Infraestructure.Persistence;
 using StandardAPI.Infraestructure.Services;
 
-namespace Infrastructure.Repositories
+namespace StandardAPI.Infraestructure.Repositories
 {
     public abstract class BaseRepository
     {
@@ -58,8 +58,7 @@ namespace Infrastructure.Repositories
                 // Cache the result
                 if (!string.IsNullOrWhiteSpace(cacheKey) && result != null)
                 {
-                    cacheDuration ??= TimeSpan.FromMinutes(10); // Default cache duration
-                    await _cacheService.SetAsync(cacheKey, result, cacheDuration.Value);
+                    await _cacheService.SetAsync(cacheKey, result);
                     _logger.LogInformation("Result cached for key: {CacheKey} with duration: {CacheDuration}", cacheKey, cacheDuration);
                 }
 

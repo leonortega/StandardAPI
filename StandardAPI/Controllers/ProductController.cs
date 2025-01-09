@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using StandardAPI.Application.Commands;
 using StandardAPI.Application.Queries;
 
-namespace API.Controllers
+namespace StandardAPI.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
