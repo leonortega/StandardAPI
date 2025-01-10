@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using StandardAPI.Application.Commands;
+using StandardAPI.Application.UseCases.Commands;
 
-namespace Application.Validators
+namespace StandardAPI.Application.UseCases.Validators
 {
     public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
     {

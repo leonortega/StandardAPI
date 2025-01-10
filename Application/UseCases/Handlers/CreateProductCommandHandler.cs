@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using StandardAPI.Application.Commands;
+using StandardAPI.Application.UseCases.Commands;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
 
-namespace Application.Commands
+namespace StandardAPI.Application.UseCases.Handlers
 {
     public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Guid>
     {

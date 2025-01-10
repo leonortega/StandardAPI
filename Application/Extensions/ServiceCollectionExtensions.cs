@@ -1,7 +1,7 @@
-﻿using Application.Validators;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
+using StandardAPI.Application.UseCases.Validators;
 
 
 namespace StandardAPI.Application.Extensions

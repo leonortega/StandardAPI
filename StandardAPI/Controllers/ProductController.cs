@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using StandardAPI.Application.Commands;
-using StandardAPI.Application.Queries;
+using StandardAPI.Application.UseCases.Commands;
+using StandardAPI.Application.UseCases.Queries;
 
 namespace StandardAPI.API.Controllers
 {

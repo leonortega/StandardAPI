@@ -40,4 +40,4 @@ EXPOSE 80
 EXPOSE 443
 
 # Set the entry point to run the application
-ENTRYPOINT ["dotnet", "StandardAPI.dll"]
+ENTRYPOINT ["dotnet", "StandardAPI.API.dll"]

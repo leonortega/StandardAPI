@@ -1,12 +1,13 @@
-version: '3.8'
-
 services:
   # webapi:
     # build:
       # context: .
       # dockerfile: Dockerfile
     # ports:
-      # - "5000:80" # Map localhost:5000 to container's port 80
+      # - "5000:80"
+      # - "5001:443"
+    # expose:
+      # - "80"      
     # environment:
       # - ASPNETCORE_ENVIRONMENT=Development
       # - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StandardAPIDB;User Id=sa;Password=Mvpqmq100v!;
@@ -16,7 +17,10 @@ services:
       # - redis
     # volumes:
       # - logs:/app/logs # Mount a volume for logs
-
+    # networks:
+      # app-network:
+        # ipv4_address: 192.168.1.100
+        
   redis:
     image: redis:latest
     container_name: redis
@@ -25,7 +29,10 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redisdata:/data
-
+    networks:
+      app-network:
+        ipv4_address: 192.168.1.101
+      
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: sqlserver
@@ -36,8 +43,18 @@ services:
       - MSSQL_SA_PASSWORD=Mvpqmq100v!
     volumes:
       - sqlserverdata:/var/opt/mssql
-
+    networks:
+      app-network:
+        ipv4_address: 192.168.1.102
+      
 volumes:
   logs: # Volume for logs
   redisdata: # Volume for Redis data
   sqlserverdata: # Volume for SQL Server data
+  
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24    

@@ -1,11 +1,11 @@
 ﻿using MediatR;
-using StandardAPI.Application.Queries;
+using StandardAPI.Application.UseCases.Queries;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
 
-namespace Application.Queries
+namespace StandardAPI.Application.UseCases.Handlers
 {
-    public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, Product>
+    public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, Product?>
     {
         private readonly IProductRepository _repository;
 
@@ -14,7 +14,7 @@ namespace Application.Queries
             _repository = repository;
         }
 
-        public async Task<Product> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Product?> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
         {
             return await _repository.GetByIdAsync(request.Id);
         }
