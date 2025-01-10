@@ -1,4 +1,6 @@
-﻿namespace StandardAPI.API.Middleware
+﻿using Azure.Core;
+
+namespace StandardAPI.API.Middleware
 {
     public class CorrelationIdMiddleware
     {
@@ -14,24 +16,34 @@
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Generate or retrieve the Correlation ID
-            var correlationId = context.Request.Headers[CorrelationIdHeaderName];
-            if (string.IsNullOrEmpty(correlationId))
+            ArgumentNullException.ThrowIfNull(context);
+
+            try
             {
-                correlationId = Guid.NewGuid().ToString();
-                context.Request.Headers[CorrelationIdHeaderName] = correlationId;
+                // Generate or retrieve the Correlation ID
+                var correlationId = context.Request.Headers[CorrelationIdHeaderName];
+                if (string.IsNullOrEmpty(correlationId))
+                {
+                    correlationId = Guid.NewGuid().ToString();
+                    context.Request.Headers[CorrelationIdHeaderName] = correlationId;
+                }
+
+                // Add Correlation ID to response headers
+                context.Response.OnStarting(() =>
+                {
+                    context.Response.Headers[CorrelationIdHeaderName] = correlationId;
+                    return Task.CompletedTask;
+                });
+
+                _logger.LogInformation("Handling request");
+                await _next(context);
+                _logger.LogInformation("Completed request");
             }
-
-            // Add Correlation ID to response headers
-            context.Response.OnStarting(() =>
+            catch (Exception ex)
             {
-                context.Response.Headers[CorrelationIdHeaderName] = correlationId;
-                return Task.CompletedTask;
-            });
-
-            _logger.LogInformation("Handling request");
-            await _next(context);
-            _logger.LogInformation("Completed request");
+                _logger.LogError(ex, "Error handling request in CorrelationIdMiddleware.");
+                throw;
+            }
         }
     }
 }

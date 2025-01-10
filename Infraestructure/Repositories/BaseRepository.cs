@@ -47,28 +47,32 @@ namespace Infrastructure.Repositories
             string policyKey,
             TimeSpan? cacheDuration = null)
         {
+            _logger.LogInformation("Starting operation with cache key: {CacheKey}, PolicyKey: {PolicyKey}", cacheKey, policyKey);
+
             try
             {
                 // Check the cache
                 if (!string.IsNullOrWhiteSpace(cacheKey))
                 {
-                    var cachedData = await _cacheService.GetAsync<T>(cacheKey);
-                    if (cachedData != null)
+                    T? cachedData = await _cacheService.GetAsync<T>(cacheKey);
+                    if (!object.Equals(cachedData, default(T)))
                     {
                         _logger.LogInformation("Cache hit for key: {CacheKey}", cacheKey);
-                        return cachedData;
+                        return cachedData!;
                     }
+
+                    _logger.LogInformation("Cache miss for key: {CacheKey}", cacheKey);
                 }
 
                 // Execute the operation with Polly resilience
-                var result = await _policyExecutor.ExecuteAsync(() =>
+                T? result = await _policyExecutor.ExecuteAsync(() =>
                 {
-                    using var connection = CreateConnection();
+                    using IDbConnection connection = CreateConnection();
                     return operation(connection);
                 }, policyKey);
 
                 // Store the result in the cache
-                if (!string.IsNullOrWhiteSpace(cacheKey) && result != null)
+                if (!string.IsNullOrWhiteSpace(cacheKey) && !object.Equals(result, default(T)))
                 {
                     await _cacheService.SetAsync(cacheKey, result);
                     _logger.LogInformation("Data cached for key: {CacheKey} with duration: {CacheDuration}", cacheKey, cacheDuration);
@@ -78,7 +82,7 @@ namespace Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during operation with cache key: {CacheKey}", cacheKey);
+                _logger.LogError(ex, "Error during operation with cache key: {CacheKey}, PolicyKey: {PolicyKey}", cacheKey, policyKey);
                 throw;
             }
         }
@@ -90,11 +94,13 @@ namespace Infrastructure.Repositories
         /// <param name="policyKey">The Polly policy key to apply.</param>
         protected async Task ExecuteWithPolicyAsync(Func<IDbConnection, Task> operation, string policyKey)
         {
+            _logger.LogInformation("Starting operation with PolicyKey (without Cache): {PolicyKey}", policyKey);
+
             try
             {
                 await _policyExecutor.ExecuteAsync(() =>
                 {
-                    using var connection = CreateConnection();
+                    using IDbConnection connection = CreateConnection();
                     return operation(connection);
                 }, policyKey);
             }

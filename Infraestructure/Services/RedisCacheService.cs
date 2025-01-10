@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Azure.Core;
 using StackExchange.Redis;
 
 namespace StandardAPI.Infraestructure.Services
@@ -10,6 +11,8 @@ namespace StandardAPI.Infraestructure.Services
 
         public RedisCacheService(IConnectionMultiplexer redis, int defaultExpiryMinutes = 10)
         {
+            ArgumentNullException.ThrowIfNull(redis);
+
             _database = redis.GetDatabase();
             _defaultExpiryMinutes = TimeSpan.FromMinutes(defaultExpiryMinutes);
         }

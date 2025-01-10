@@ -1,25 +1,26 @@
 services:
-  # webapi:
-    # build:
-      # context: .
-      # dockerfile: Dockerfile
-    # ports:
-      # - "5000:80"
-      # - "5001:443"
-    # expose:
-      # - "80"      
-    # environment:
-      # - ASPNETCORE_ENVIRONMENT=Development
-      # - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StandardAPIDB;User Id=sa;Password=Mvpqmq100v!;
-      # - Redis__ConnectionString=redis:6379
-    # depends_on:
-      # - sqlserver
-      # - redis
-    # volumes:
-      # - logs:/app/logs # Mount a volume for logs
-    # networks:
-      # app-network:
-        # ipv4_address: 192.168.1.100
+  standardapi.api:
+    image: ${DOCKER_REGISTRY-}standardapiapi
+    build:
+      context: .
+      dockerfile: StandardAPI/Dockerfile
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    expose:
+      - "80"      
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StandardAPIDB;User Id=sa;Password=Mvpqmq100v!;
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      - sqlserver
+      - redis
+    volumes:
+      - logs:/app/logs # Mount a volume for logs
+    networks:
+      app-network:
+        ipv4_address: 192.168.1.100
         
   redis:
     image: redis:latest

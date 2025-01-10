@@ -16,6 +16,8 @@ namespace StandardAPI.Application.UseCases.Handlers
 
         public async Task<Product?> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             return await _repository.GetByIdAsync(request.Id);
         }
     }

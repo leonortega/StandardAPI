@@ -9,6 +9,7 @@ using StandardAPI.Infraestructure.Persistence;
 using StandardAPI.Infraestructure.Repositories;
 using StandardAPI.Infraestructure.Services;
 using StandardAPI.Infraestructure.Settings;
+using Azure.Core;
 
 namespace StandardAPI.Infraestructure.Extensions
 {
@@ -16,7 +17,9 @@ namespace StandardAPI.Infraestructure.Extensions
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            var dbConnectionString = configuration.GetConnectionString("DefaultConnection");
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            string? dbConnectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddSingleton(new DatabaseConnectionFactory(dbConnectionString!));
 
             var redisSettings = new RedisSettings();

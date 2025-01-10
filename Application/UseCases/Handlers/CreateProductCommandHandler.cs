@@ -16,6 +16,8 @@ namespace StandardAPI.Application.UseCases.Handlers
 
         public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             var product = new Product
             {
                 Id = Guid.NewGuid(),
