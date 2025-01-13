@@ -1,7 +1,10 @@
-﻿using FluentValidation;
+﻿using System.Reflection;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using StandardAPI.Application.Mappers;
+using StandardAPI.Application.UseCases.Commands;
+using StandardAPI.Application.UseCases.Queries;
 using StandardAPI.Application.UseCases.Validators;
 
 
@@ -14,10 +17,14 @@ namespace StandardAPI.Application.Extensions
             //Mappers
             services.AddSingleton<ProductMapper>();
 
+            //Validations
             services.AddFluentValidationAutoValidation();
             services.AddFluentValidationClientsideAdapters();
             services.AddValidatorsFromAssemblyContaining<CreateProductCommandValidator>();
 
+            // MediatR
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetProductByIdQuery).Assembly));
 
             return services;
         }

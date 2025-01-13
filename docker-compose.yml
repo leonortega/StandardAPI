@@ -44,18 +44,12 @@ services:
     ports:
       - "26257:26257" # SQL port
       - "8080:8080"   # Admin UI port
+    command: start-single-node --insecure
     volumes:
       - crdb_data:/cockroach/cockroach-data
     networks:
       app-network:
-        ipv4_address: 192.168.1.102 
-    command: start-single-node --insecure
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d postgres -p 26257"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 20s
+        ipv4_address: 192.168.1.102
 
 volumes:
   logs: # Volume for logs
