@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 
 namespace StandardAPI.Infraestructure.Persistence
 {
@@ -9,9 +9,9 @@ namespace StandardAPI.Infraestructure.Persistence
 
         public DatabaseConnectionFactory(string connectionString)
         {
-            _connectionString = connectionString;
+            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-        public IDbConnection CreateConnection() => new SqlConnection(_connectionString);
+        public IDbConnection CreateConnection() => new NpgsqlConnection(_connectionString);
     }
 }

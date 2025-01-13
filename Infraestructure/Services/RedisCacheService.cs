@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Azure.Core;
 using StackExchange.Redis;
 
 namespace StandardAPI.Infraestructure.Services

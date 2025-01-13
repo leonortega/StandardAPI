@@ -1,15 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Polly.CircuitBreaker;
-using Polly;
 using StackExchange.Redis;
 using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Persistence;
 using StandardAPI.Infraestructure.Repositories;
 using StandardAPI.Infraestructure.Services;
 using StandardAPI.Infraestructure.Settings;
-using Azure.Core;
 
 namespace StandardAPI.Infraestructure.Extensions
 {
@@ -19,9 +15,11 @@ namespace StandardAPI.Infraestructure.Extensions
         {
             ArgumentNullException.ThrowIfNull(configuration);
 
-            string? dbConnectionString = configuration.GetConnectionString("DefaultConnection");
+            // CockroachDB connection
+            var dbConnectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddSingleton(new DatabaseConnectionFactory(dbConnectionString!));
 
+            // Redis configuration
             var redisSettings = new RedisSettings();
             configuration.GetSection("Redis").Bind(redisSettings);
 
@@ -29,8 +27,10 @@ namespace StandardAPI.Infraestructure.Extensions
             services.AddSingleton<IConnectionMultiplexer>(sp => redisConnection);
             services.AddSingleton(sp => new RedisCacheService(redisConnection, redisSettings.DefaultCacheExpiryMinutes));
 
+            // Polly policies
             services.AddPollyPolicies(configuration);
 
+            // Repositories
             services.AddScoped<IProductRepository, ProductRepository>();
 
             return services;

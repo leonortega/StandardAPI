@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Azure.Core;
 
 namespace StandardAPI.API.Middleware
 {

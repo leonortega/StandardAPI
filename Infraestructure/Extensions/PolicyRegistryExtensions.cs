@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using StandardAPI.Infraestructure.Services;
 using StandardAPI.Infraestructure.Settings;
-using Azure.Core;
 
 namespace StandardAPI.Infraestructure.Extensions
 {

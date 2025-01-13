@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Dapper;
+﻿using Dapper;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
 using StandardAPI.Domain.Entities;

@@ -19,6 +19,16 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// Add services
+builder.Services.AddHealthChecks()
+    .AddRedis(builder.Configuration["Redis:ConnectionString"]!) // Check Redis
+    .AddNpgSql( // Check CRDB
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+        name: "CockroachDB",
+        healthQuery: "SELECT 1;", // Simple health check query
+        timeout: TimeSpan.FromSeconds(5)
+    );
+
 var app = builder.Build();
 
 // Enable Serilog request logging
@@ -37,5 +47,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+// Map health check endpoint
+app.MapHealthChecks("/health");
 
 await app.RunAsync();

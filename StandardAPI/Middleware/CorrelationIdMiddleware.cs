@@ -1,6 +1,4 @@
-﻿using Azure.Core;
-
-namespace StandardAPI.API.Middleware
+﻿namespace StandardAPI.API.Middleware
 {
     public class CorrelationIdMiddleware
     {
