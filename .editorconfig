@@ -32,6 +32,12 @@ dotnet_diagnostic.S2139.severity = none
 # CA1515: Consider making public types internal
 dotnet_diagnostic.CA1515.severity = none
 
+# RMG012: Source member was not found for target member
+dotnet_diagnostic.RMG012.severity = none
+
+# RMG020: Source member is not mapped to any target member
+dotnet_diagnostic.RMG020.severity = none
+
 [*.{cs,vb}]
 #### Naming styles ####
 

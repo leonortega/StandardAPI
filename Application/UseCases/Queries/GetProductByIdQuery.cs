@@ -1,7 +1,10 @@
 ﻿using MediatR;
-using StandardAPI.Domain.Entities;
+using StandardAPI.Application.DTOs;
 
 namespace StandardAPI.Application.UseCases.Queries
 {
-    public record GetProductByIdQuery(Guid Id) : IRequest<Product>;
+    public class GetProductByIdQuery(Guid id) : IRequest<ProductDto>
+    {
+        public Guid Id { get; } = id;
+    }
 }
