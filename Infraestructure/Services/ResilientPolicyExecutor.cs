@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Registry;
-using StandardAPI.Infraestructure.Repositories;
 
 namespace StandardAPI.Infraestructure.Services
 {

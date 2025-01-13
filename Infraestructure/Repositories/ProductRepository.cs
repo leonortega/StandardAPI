@@ -31,7 +31,7 @@ namespace StandardAPI.Infraestructure.Repositories
             await ExecuteWithPolicyAsync(async connection =>
             {
                 await connection.ExecuteAsync(sql, entity);
-            }, nameof(AddAsync));
+            });
 
             await InvalidateCacheAsync("products:all");
 
@@ -46,7 +46,7 @@ namespace StandardAPI.Infraestructure.Repositories
             await ExecuteWithPolicyAsync(async connection =>
             {
                 await connection.ExecuteAsync(sql, new { Id = id });
-            }, nameof(DeleteAsync));
+            });
 
             await InvalidateCacheAsync("products:all");
             await InvalidateCacheAsync($"products:{id}");
@@ -63,7 +63,7 @@ namespace StandardAPI.Infraestructure.Repositories
             {
                 var products = await connection.QueryAsync<Product>(sql);
                 return products.ToList();
-            }, nameof(GetAllAsync), TimeSpan.FromMinutes(15));
+            }, TimeSpan.FromMinutes(15));
         }
 
         public async Task<Product?> GetByIdAsync(Guid id)
@@ -74,7 +74,7 @@ namespace StandardAPI.Infraestructure.Repositories
             return await ExecuteWithPolicyAndCacheAsync($"products:{id}", async connection =>
             {
                 return await connection.QueryFirstOrDefaultAsync<Product>(sql, new { Id = id });
-            }, nameof(GetByIdAsync), TimeSpan.FromMinutes(10));
+            }, TimeSpan.FromMinutes(10));
         }
 
         public async Task UpdateAsync(Product entity)
@@ -87,7 +87,7 @@ namespace StandardAPI.Infraestructure.Repositories
             await ExecuteWithPolicyAsync(async connection =>
             {
                 await connection.ExecuteAsync(sql, entity);
-            }, nameof(UpdateAsync));
+            });
 
             await InvalidateCacheAsync($"products:{entity.Id}");
             await InvalidateCacheAsync("products:all");
@@ -106,7 +106,7 @@ namespace StandardAPI.Infraestructure.Repositories
             {
                 var products = await connection.QueryAsync<Product>(sql, new { MinPrice = minPrice, MaxPrice = maxPrice });
                 return products.ToList();
-            }, nameof(GetProductsByPriceRangeAsync), TimeSpan.FromMinutes(10));
+            }, TimeSpan.FromMinutes(10));
         }
     }
 }

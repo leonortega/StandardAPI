@@ -44,10 +44,9 @@ namespace Infrastructure.Repositories
         protected async Task<T> ExecuteWithPolicyAndCacheAsync<T>(
             string cacheKey,
             Func<IDbConnection, Task<T>> operation,
-            string policyKey,
             TimeSpan? cacheDuration = null)
         {
-            _logger.LogInformation("Starting operation with cache key: {CacheKey}, PolicyKey: {PolicyKey}", cacheKey, policyKey);
+            _logger.LogInformation("Starting operation with cache key: {CacheKey}, PolicyKey: RetryAndCircuitBreaker", cacheKey);
 
             try
             {
@@ -69,7 +68,7 @@ namespace Infrastructure.Repositories
                 {
                     using IDbConnection connection = CreateConnection();
                     return operation(connection);
-                }, policyKey);
+                }, "RetryAndCircuitBreaker");
 
                 // Store the result in the cache
                 if (!string.IsNullOrWhiteSpace(cacheKey) && !object.Equals(result, default(T)))
@@ -82,7 +81,7 @@ namespace Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during operation with cache key: {CacheKey}, PolicyKey: {PolicyKey}", cacheKey, policyKey);
+                _logger.LogError(ex, "Error during operation with cache key: {CacheKey}, PolicyKey: RetryAndCircuitBreaker", cacheKey);
                 throw;
             }
         }
@@ -92,9 +91,9 @@ namespace Infrastructure.Repositories
         /// </summary>
         /// <param name="operation">The database operation to execute.</param>
         /// <param name="policyKey">The Polly policy key to apply.</param>
-        protected async Task ExecuteWithPolicyAsync(Func<IDbConnection, Task> operation, string policyKey)
+        protected async Task ExecuteWithPolicyAsync(Func<IDbConnection, Task> operation)
         {
-            _logger.LogInformation("Starting operation with PolicyKey (without Cache): {PolicyKey}", policyKey);
+            _logger.LogInformation("Starting operation with PolicyKey (without Cache): RetryAndCircuitBreaker");
 
             try
             {
@@ -102,11 +101,11 @@ namespace Infrastructure.Repositories
                 {
                     using IDbConnection connection = CreateConnection();
                     return operation(connection);
-                }, policyKey);
+                }, "RetryAndCircuitBreaker");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during operation with Polly policy: {PolicyKey}", policyKey);
+                _logger.LogError(ex, "Error during operation with Polly policy: RetryAndCircuitBreaker");
                 throw;
             }
         }
