@@ -26,7 +26,7 @@ builder.Services.AddHealthChecks()
         connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
         name: "CockroachDB",
         healthQuery: "SELECT 1;", // Simple health check query
-        timeout: TimeSpan.FromSeconds(5)
+        timeout: TimeSpan.FromSeconds(30)
     );
 
 var app = builder.Build();

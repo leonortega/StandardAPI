@@ -9,13 +9,13 @@ services:
       - "5001:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StandardAPIDB;User Id=sa;Password=Mvpqmq100v!;
+      - ConnectionStrings__DefaultConnection=Host=cockroachdb;Port=26257;Database=defaultdb;Username=root;SslMode=Disable
       - Redis__ConnectionString=redis:6379
     depends_on:
       - cockroachdb
       - redis
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3 
@@ -52,10 +52,10 @@ services:
     command: start-single-node --insecure
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U root -d postgres -p 26257"]
-      interval: 5s
-      timeout: 5s
+      interval: 15s
+      timeout: 10s
       retries: 5
-      start_period: 10s
+      start_period: 20s
 
 volumes:
   logs: # Volume for logs
