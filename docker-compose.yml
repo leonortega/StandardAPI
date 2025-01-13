@@ -1,20 +1,18 @@
 services:
   standardapi.api:
-    image: ${DOCKER_REGISTRY-}standardapiapi
+    image: ${DOCKER_REGISTRY-}standardapi
     build:
       context: .
       dockerfile: StandardAPI/Dockerfile
     ports:
       - "5000:8080"
       - "5001:8081"
-    expose:
-      - "80"      
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StandardAPIDB;User Id=sa;Password=Mvpqmq100v!;
       - Redis__ConnectionString=redis:6379
     depends_on:
-      - sqlserver
+      - cockroachdb
       - redis
     volumes:
       - logs:/app/logs # Mount a volume for logs
@@ -34,24 +32,30 @@ services:
       app-network:
         ipv4_address: 192.168.1.101
       
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: sqlserver
+  cockroachdb:
+    image: cockroachdb/cockroach:latest-v23.1
+    container_name: cockroachdb
+    hostname: cockroachdb
     ports:
-      - "1433:1433"
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Mvpqmq100v!
+      - "26257:26257" # SQL port
+      - "8080:8080"   # Admin UI port
     volumes:
-      - sqlserverdata:/var/opt/mssql
+      - crdb_data:/cockroach/cockroach-data
     networks:
       app-network:
-        ipv4_address: 192.168.1.102
-      
+        ipv4_address: 192.168.1.102 
+    command: start-single-node --insecure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d postgres -p 26257"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 volumes:
   logs: # Volume for logs
   redisdata: # Volume for Redis data
-  sqlserverdata: # Volume for SQL Server data
+  crdb_data: # Volume for CRRB data
   
 networks:
   app-network:
