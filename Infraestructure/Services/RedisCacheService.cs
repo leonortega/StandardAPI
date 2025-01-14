@@ -1,36 +1,81 @@
-﻿using System.Text.Json;
-using StackExchange.Redis;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using StandardAPI.Infraestructure.Settings;
 
 namespace StandardAPI.Infraestructure.Services
 {
-    public class RedisCacheService
+    public class RedisCacheService : IDistributedCache
     {
-        private readonly IDatabase _database;
-        private readonly TimeSpan _defaultExpiryMinutes;
+        private readonly IDistributedCache _innerCache;
+        private readonly ILogger<RedisCacheService> _logger;
+        private readonly TimeSpan _defaultExpiration;
 
-        public RedisCacheService(IConnectionMultiplexer redis, int defaultExpiryMinutes = 10)
+        public RedisCacheService(Func<IDistributedCache> innerCacheFactory, ILogger<RedisCacheService> logger, IConfiguration configuration)
         {
-            ArgumentNullException.ThrowIfNull(redis);
+            ArgumentNullException.ThrowIfNull(configuration);
+            ArgumentNullException.ThrowIfNull(innerCacheFactory);
 
-            _database = redis.GetDatabase();
-            _defaultExpiryMinutes = TimeSpan.FromMinutes(defaultExpiryMinutes);
+            _innerCache = innerCacheFactory();
+            _logger = logger;
+
+            var redisSettings = new RedisSettings();
+            configuration.GetSection("Redis").Bind(redisSettings);
+
+            _defaultExpiration = TimeSpan.FromMinutes(configuration.GetValue<int>(redisSettings.DefaultCacheExpiryMinutes!, 60));
         }
 
-        public async Task<T?> GetAsync<T>(string key)
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
-            var value = await _database.StringGetAsync(key);
-            return value.HasValue ? JsonSerializer.Deserialize<T>(value!) : default;
+            if (options == null)
+            {
+                options = new DistributedCacheEntryOptions();
+            }
+
+            if (!options.AbsoluteExpiration.HasValue)
+            {
+                options.AbsoluteExpiration = DateTimeOffset.Now.Add(_defaultExpiration);
+            }
+
+            _logger.LogDebug("Setting cache key: {Key}", key);
+            return _innerCache.SetAsync(key, value, options, token);
         }
 
-        public async Task SetAsync<T>(string key, T value)
+        public Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
-            var serializedValue = JsonSerializer.Serialize(value);
-            await _database.StringSetAsync(key, serializedValue, _defaultExpiryMinutes);
+            _logger.LogDebug("Getting cache key: {Key}", key);
+            return _innerCache.GetAsync(key, token);
         }
 
-        public async Task DeleteAsync(string key)
+        public Task RemoveAsync(string key, CancellationToken token = default)
         {
-            await _database.KeyDeleteAsync(key);
+            _logger.LogDebug("Removing cache key: {Key}", key);
+            return _innerCache.RemoveAsync(key, token);
+        }
+
+        public byte[]? Get(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Refresh(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RefreshAsync(string key, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(string key)
+        {
+            throw new NotImplementedException();
         }
     }
 }

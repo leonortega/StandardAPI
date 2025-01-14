@@ -1,8 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 using StackExchange.Redis;
+using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
-using StandardAPI.Infraestructure.Persistence;
 using StandardAPI.Infraestructure.Repositories;
 using StandardAPI.Infraestructure.Services;
 using StandardAPI.Infraestructure.Settings;
@@ -13,25 +17,71 @@ namespace StandardAPI.Infraestructure.Extensions
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddRedisCache(configuration);
+            services.AddNpgsql(configuration);
+            services.AddPollyPolicies(configuration);
+
+            //Repositories
+            services.AddRepository<Product>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddRepository<TEntity>(this IServiceCollection services)
+            where TEntity : class
+        {
+            services.AddScoped<IBaseRepository<TEntity>, BaseRepository<TEntity>>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
+        {
             ArgumentNullException.ThrowIfNull(configuration);
 
-            // CockroachDB connection
-            var dbConnectionString = configuration.GetConnectionString("DefaultConnection");
-            services.AddSingleton(new DatabaseConnectionFactory(dbConnectionString!));
-
-            // Redis configuration
             var redisSettings = new RedisSettings();
             configuration.GetSection("Redis").Bind(redisSettings);
 
-            var redisConnection = ConnectionMultiplexer.Connect(redisSettings.ConnectionString!);
-            services.AddSingleton<IConnectionMultiplexer>(sp => redisConnection);
-            services.AddSingleton(sp => new RedisCacheService(redisConnection, redisSettings.DefaultCacheExpiryMinutes));
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.ConfigurationOptions = ConfigurationOptions.Parse(redisSettings.ConnectionString!);
+            });
+            
+            services.AddScoped<Func<IDistributedCache>>(sp => () => sp.GetRequiredService<RedisCacheService>());
+            services.AddScoped<IDistributedCache, RedisCacheService>();
 
-            // Polly policies
-            services.AddPollyPolicies(configuration);
+            return services;
+        }
 
-            // Repositories
-            services.AddScoped<IProductRepository, ProductRepository>();
+        public static IServiceCollection AddNpgsql(this IServiceCollection services, IConfiguration configuration)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            services.AddSingleton<string>(configuration.GetConnectionString("DefaultConnection")!);
+            return services;
+        }
+
+        public static IServiceCollection AddPollyPolicies(this IServiceCollection services, IConfiguration configuration)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            var pollySettings = new PollySettings();
+            configuration.GetSection("Polly").Bind(pollySettings);
+
+            services.AddTransient<AsyncRetryPolicy>(sp =>
+                Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(
+                        retryCount: pollySettings.RetryCount,
+                        sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(retryAttempt * pollySettings.RetryIntervalInSeconds)));
+
+            services.AddTransient<AsyncCircuitBreakerPolicy>(sp =>
+                Policy
+                    .Handle<Exception>()
+                    .CircuitBreakerAsync(
+                        exceptionsAllowedBeforeBreaking: pollySettings.CircuitBreakerExceptionsAllowedBeforeBreaking,
+                        durationOfBreak: TimeSpan.FromSeconds(pollySettings.CircuitBreakerDurationInSeconds)));
 
             return services;
         }

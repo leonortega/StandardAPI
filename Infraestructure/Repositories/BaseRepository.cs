@@ -1,126 +1,168 @@
-﻿using System.Data;
+﻿using System.Text.Json;
+using Dapper;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using StandardAPI.Infraestructure.Persistence;
-using StandardAPI.Infraestructure.Services;
+using Npgsql;
+using Polly.CircuitBreaker;
+using Polly.Retry;
+using StandardAPI.Domain.Interfaces;
 
-namespace Infrastructure.Repositories
+namespace StandardAPI.Infraestructure.Repositories
 {
-    public abstract class BaseRepository
+    public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
-        private readonly ResilientPolicyExecutor _policyExecutor;
-        private readonly RedisCacheService _cacheService;
-        private readonly DatabaseConnectionFactory _connectionFactory;
-        private readonly ILogger<BaseRepository> _logger;
+        private readonly IDistributedCache _cache;
+        private readonly ILogger<BaseRepository<TEntity>> _logger;
+        private readonly AsyncRetryPolicy _retryPolicy;
+        private readonly AsyncCircuitBreakerPolicy _circuitBreakerPolicy;
+        private readonly string _connectionString;
 
-        protected BaseRepository(
-            ResilientPolicyExecutor policyExecutor,
-            RedisCacheService cacheService,
-            DatabaseConnectionFactory connectionFactory,
-            ILogger<BaseRepository> logger)
+        public BaseRepository(IDistributedCache cache,
+                              ILogger<BaseRepository<TEntity>> logger,
+                              AsyncRetryPolicy retryPolicy,
+                              AsyncCircuitBreakerPolicy circuitBreakerPolicy,
+                              string connectionString)
         {
-            _policyExecutor = policyExecutor;
-            _cacheService = cacheService;
-            _connectionFactory = connectionFactory;
+            _cache = cache;
             _logger = logger;
+            _retryPolicy = retryPolicy;
+            _circuitBreakerPolicy = circuitBreakerPolicy;
+            _connectionString = connectionString;
         }
 
-        /// <summary>
-        /// Provides a database connection for operations.
-        /// </summary>
-        protected IDbConnection CreateConnection()
+        private async Task<T?> ExecuteScalarAsync<T>(string sql, object? param = null)
         {
-            return _connectionFactory.CreateConnection();
-        }
-
-        /// <summary>
-        /// Executes a database operation with caching and Polly resilience policies.
-        /// </summary>
-        /// <typeparam name="T">The type of the data being retrieved.</typeparam>
-        /// <param name="cacheKey">The Redis cache key.</param>
-        /// <param name="operation">The database operation to execute.</param>
-        /// <param name="policyKey">The Polly policy key to apply.</param>
-        /// <param name="cacheDuration">Optional cache duration (default: 10 minutes).</param>
-        /// <returns>The result of the operation.</returns>
-        protected async Task<T> ExecuteWithPolicyAndCacheAsync<T>(
-            string cacheKey,
-            Func<IDbConnection, Task<T>> operation,
-            TimeSpan? cacheDuration = null)
-        {
-            _logger.LogInformation("Starting operation with cache key: {CacheKey}, PolicyKey: RetryAndCircuitBreaker", cacheKey);
-
-            try
+            return await _retryPolicy.ExecuteAsync(async () =>
             {
-                // Check the cache
-                if (!string.IsNullOrWhiteSpace(cacheKey))
+                using (var connection = new NpgsqlConnection(_connectionString))
                 {
-                    T? cachedData = await _cacheService.GetAsync<T>(cacheKey);
-                    if (!object.Equals(cachedData, default(T)))
-                    {
-                        _logger.LogInformation("Cache hit for key: {CacheKey}", cacheKey);
-                        return cachedData!;
-                    }
-
-                    _logger.LogInformation("Cache miss for key: {CacheKey}", cacheKey);
+                    await connection.OpenAsync();
+                    return await connection.ExecuteScalarAsync<T>(sql, param);
                 }
+            });
+        }
 
-                // Execute the operation with Polly resilience
-                T? result = await _policyExecutor.ExecuteAsync(() =>
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null)
+        {
+            return await _retryPolicy.ExecuteAsync(async () =>
+            {
+                using (var connection = new NpgsqlConnection(_connectionString))
                 {
-                    using IDbConnection connection = CreateConnection();
-                    return operation(connection);
-                }, "RetryAndCircuitBreaker");
-
-                // Store the result in the cache
-                if (!string.IsNullOrWhiteSpace(cacheKey) && !object.Equals(result, default(T)))
-                {
-                    await _cacheService.SetAsync(cacheKey, result);
-                    _logger.LogInformation("Data cached for key: {CacheKey} with duration: {CacheDuration}", cacheKey, cacheDuration);
+                    await connection.OpenAsync();
+                    return await connection.QueryAsync<T>(sql, param);
                 }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during operation with cache key: {CacheKey}, PolicyKey: RetryAndCircuitBreaker", cacheKey);
-                throw;
-            }
+            });
         }
 
-        /// <summary>
-        /// Executes a database operation with Polly resilience policies.
-        /// </summary>
-        /// <param name="operation">The database operation to execute.</param>
-        /// <param name="policyKey">The Polly policy key to apply.</param>
-        protected async Task ExecuteWithPolicyAsync(Func<IDbConnection, Task> operation)
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            _logger.LogInformation("Starting operation with PolicyKey (without Cache): RetryAndCircuitBreaker");
+            string cacheKey = $"All_{typeof(TEntity).Name}";
+            var cachedData = await _cache.GetStringAsync(cacheKey);
 
-            try
+            if (!string.IsNullOrEmpty(cachedData))
             {
-                await _policyExecutor.ExecuteAsync(() =>
-                {
-                    using IDbConnection connection = CreateConnection();
-                    return operation(connection);
-                }, "RetryAndCircuitBreaker");
+                _logger.LogInformation("Retrieving all {EntityName} from cache.", typeof(TEntity).Name);
+                return JsonSerializer.Deserialize<IEnumerable<TEntity>>(cachedData) ?? [];
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during operation with Polly policy: RetryAndCircuitBreaker");
-                throw;
-            }
+
+            _logger.LogInformation("Retrieving all {EntityName} from database.", typeof(TEntity).Name);
+            string tableName = typeof(TEntity).Name;
+            string sql = $"SELECT * FROM {tableName}";
+            var entities = await QueryAsync<TEntity>(sql);
+
+            var serializedEntities = JsonSerializer.Serialize(entities);
+            await _cache.SetStringAsync(cacheKey, serializedEntities);
+
+            return entities;
         }
 
-        /// <summary>
-        /// Invalidates a cache entry by key.
-        /// </summary>
-        /// <param name="cacheKey">The Redis cache key to invalidate.</param>
-        protected async Task InvalidateCacheAsync(string cacheKey)
+        public virtual async Task<TEntity?> GetByIdAsync(Guid id)
         {
-            if (!string.IsNullOrWhiteSpace(cacheKey))
+            string cacheKey = $"{typeof(TEntity).Name}_{id}";
+            var cachedData = await _cache.GetStringAsync(cacheKey);
+
+            if (!string.IsNullOrEmpty(cachedData))
             {
-                await _cacheService.DeleteAsync(cacheKey);
-                _logger.LogInformation("Cache invalidated for key: {CacheKey}", cacheKey);
+                _logger.LogInformation("Retrieving {EntityName} with ID {Id} from cache.", typeof(TEntity).Name, id);
+                return JsonSerializer.Deserialize<TEntity>(cachedData);
             }
+
+            _logger.LogInformation("Retrieving {EntityName} with ID {Id} from database.", typeof(TEntity).Name, id);
+            string tableName = typeof(TEntity).Name;
+            string sql = $"SELECT * FROM {tableName} WHERE Id = @Id";
+            var entity = (await QueryAsync<TEntity>(sql, new { Id = id })).FirstOrDefault();
+
+            if (entity != null)
+            {
+                var serializedEntity = JsonSerializer.Serialize(entity);
+                await _cache.SetStringAsync(cacheKey, serializedEntity);
+            }
+
+            return entity;
+        }
+
+        public virtual async Task<int> AddAsync(TEntity entity)
+        {
+            string tableName = typeof(TEntity).Name;
+            // Get the properties of the entity
+            var properties = typeof(TEntity).GetProperties();
+            // Construct the column names and parameter names
+            string columns = string.Join(",", properties.Select(p => $"[{p.Name}]"));
+            string parameters = string.Join(",", properties.Select(p => $"@{p.Name}"));
+            string sql = $"INSERT INTO {tableName} ({columns}) VALUES ({parameters}); SELECT CAST(SCOPE_IDENTITY() as int)";
+
+            var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
+            {
+                return await ExecuteScalarAsync<int>(sql, entity);
+            });
+
+            // Invalidate cache after adding a new entity
+            string allEntitiesCacheKey = $"All_{typeof(TEntity).Name}";
+            await _cache.RemoveAsync(allEntitiesCacheKey);
+
+            return result;
+        }
+
+        public virtual async Task<int> UpdateAsync(TEntity entity)
+        {
+            string tableName = typeof(TEntity).Name;
+            // Get the properties of the entity
+            var properties = typeof(TEntity).GetProperties();
+            // Construct the update set clause
+            string setClause = string.Join(",", properties.Select(p => $"[{p.Name}] = @{p.Name}"));
+            string sql = $"UPDATE {tableName} SET {setClause} WHERE Id = @Id";
+
+            var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
+            {
+                return await ExecuteScalarAsync<int>(sql, entity);
+            });
+
+            // Invalidate cache after updating an entity
+            string allEntitiesCacheKey = $"All_{typeof(TEntity).Name}";
+            string entityCacheKey = $"{typeof(TEntity).Name}_{((dynamic)entity).Id}";
+            await _cache.RemoveAsync(allEntitiesCacheKey);
+            await _cache.RemoveAsync(entityCacheKey);
+
+            return result;
+        }
+
+        public virtual async Task<int> DeleteAsync(Guid id)
+        {
+            string tableName = typeof(TEntity).Name;
+            string sql = $"DELETE FROM {tableName} WHERE Id = @Id";
+
+            var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
+            {
+                return await ExecuteScalarAsync<int>(sql, new { Id = id });
+            });
+
+            // Invalidate cache after deleting an entity
+            string allEntitiesCacheKey = $"All_{typeof(TEntity).Name}";
+            string entityCacheKey = $"{typeof(TEntity).Name}_{id}";
+            await _cache.RemoveAsync(allEntitiesCacheKey);
+            await _cache.RemoveAsync(entityCacheKey);
+
+            return result;
         }
     }
 }

@@ -1,112 +1,30 @@
-﻿using Dapper;
-using Infrastructure.Repositories;
+﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
-using StandardAPI.Infraestructure.Persistence;
-using StandardAPI.Infraestructure.Services;
-using static Dapper.SqlMapper;
 
 namespace StandardAPI.Infraestructure.Repositories
 {
-    public class ProductRepository : BaseRepository, IProductRepository
+    public class ProductRepository : BaseRepository<Product>, IProductRepository
     {
-        private readonly ILogger<ProductRepository> _logger;
-
-        public ProductRepository(
-            ResilientPolicyExecutor policyExecutor,
-            RedisCacheService cacheService,
-            DatabaseConnectionFactory connectionFactory,
-            ILogger<ProductRepository> logger)
-            : base(policyExecutor, cacheService, connectionFactory, logger)
+        public ProductRepository(IDistributedCache cache,
+                                 ILogger<ProductRepository> logger,
+                                 AsyncRetryPolicy retryPolicy,
+                                 AsyncCircuitBreakerPolicy circuitBreakerPolicy,
+                                 string connectionString)
+            : base(cache, logger, retryPolicy, circuitBreakerPolicy, connectionString)
         {
-            _logger = logger;
         }
 
-        public async Task AddAsync(Product entity)
+        public async Task<IEnumerable<Product>> GetProductsByPriceRangeAsync(decimal minPrice, decimal maxPrice)
         {
-            _logger.LogInformation("Adding product: {Product}", entity);
-
-            const string sql = "INSERT INTO Products (Id, Name, Price) VALUES (@Id, @Name, @Price)";
-            await ExecuteWithPolicyAsync(async connection =>
-            {
-                await connection.ExecuteAsync(sql, entity);
-            });
-
-            await InvalidateCacheAsync("products:all");
-
-            _logger.LogInformation("Product added and cache invalidated for all products.");
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            _logger.LogInformation("Deleting product with id: {Id}", id);
-
-            const string sql = "DELETE FROM Products WHERE Id = @Id";
-            await ExecuteWithPolicyAsync(async connection =>
-            {
-                await connection.ExecuteAsync(sql, new { Id = id });
-            });
-
-            await InvalidateCacheAsync("products:all");
-            await InvalidateCacheAsync($"products:{id}");
-
-            _logger.LogInformation("Product deleted and cache invalidated for all products.");
-        }
-
-        public async Task<IReadOnlyList<Product>> GetAllAsync()
-        {
-            _logger.LogInformation("Getting all products");
-
-            const string sql = "SELECT * FROM Products";
-            return await ExecuteWithPolicyAndCacheAsync("products:all", async connection =>
-            {
-                var products = await connection.QueryAsync<Product>(sql);
-                return products.ToList();
-            }, TimeSpan.FromMinutes(15));
-        }
-
-        public async Task<Product?> GetByIdAsync(Guid id)
-        {
-            _logger.LogInformation("Getting product with id: {Id}", id);
-
-            const string sql = "SELECT * FROM Products WHERE Id = @Id";
-            return await ExecuteWithPolicyAndCacheAsync($"products:{id}", async connection =>
-            {
-                return await connection.QueryFirstOrDefaultAsync<Product>(sql, new { Id = id });
-            }, TimeSpan.FromMinutes(10));
-        }
-
-        public async Task UpdateAsync(Product entity)
-        {
-            ArgumentNullException.ThrowIfNull(entity);
-
-            _logger.LogInformation("Updating product: {Product}", entity);
-
-            const string sql = "UPDATE Products SET Name = @Name, Price = @Price WHERE Id = @Id";
-            await ExecuteWithPolicyAsync(async connection =>
-            {
-                await connection.ExecuteAsync(sql, entity);
-            });
-
-            await InvalidateCacheAsync($"products:{entity.Id}");
-            await InvalidateCacheAsync("products:all");
-
-            _logger.LogInformation("Product updated and cache invalidated for all products.");
-        }
-
-        public async Task<IReadOnlyList<Product>> GetProductsByPriceRangeAsync(decimal minPrice, decimal maxPrice)
-        {
-            _logger.LogInformation("Getting all product with price range min={MinPrice} - max={MaxPrice}", minPrice, maxPrice);
-
-            string cacheKey = $"products:price:{minPrice}:{maxPrice}";
-            const string sql = "SELECT * FROM Products WHERE Price BETWEEN @MinPrice AND @MaxPrice";
-
-            return await ExecuteWithPolicyAndCacheAsync(cacheKey, async connection =>
-            {
-                var products = await connection.QueryAsync<Product>(sql, new { MinPrice = minPrice, MaxPrice = maxPrice });
-                return products.ToList();
-            }, TimeSpan.FromMinutes(10));
+            string sql = @"
+            SELECT * 
+            FROM Products
+            WHERE Price >= @MinPrice AND Price <= @MaxPrice";
+            return await QueryAsync<Product>(sql, new { MinPrice = minPrice, MaxPrice = maxPrice });
         }
     }
 }

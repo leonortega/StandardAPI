@@ -3,7 +3,8 @@
     public class PollySettings
     {
         public int RetryCount { get; set; }
-        public TimeSpan CircuitBreakerDuration { get; set; }
+        public int RetryIntervalInSeconds { get; set; }
+        public int CircuitBreakerDurationInSeconds { get; set; }
         public int CircuitBreakerExceptionsAllowedBeforeBreaking { get; set; }
     }
 }
