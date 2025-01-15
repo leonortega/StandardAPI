@@ -3,7 +3,7 @@ services:
     image: ${DOCKER_REGISTRY-}standardapi
     build:
       context: .
-      dockerfile: StandardAPI/Dockerfile
+      dockerfile: src/StandardAPI/Dockerfile
     ports:
       - "5000:8080"
       - "5001:8081"
