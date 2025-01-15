@@ -1,4 +1,5 @@
 ﻿using FluentMigrator.Runner;
+using FluentMigrator.Runner.VersionTableInfo;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace StandardAPI.Infraestructure.Migrations
@@ -13,6 +14,8 @@ namespace StandardAPI.Infraestructure.Migrations
                     .WithGlobalConnectionString(connectionString)
                     .ScanIn(typeof(MigrationRunnerSetup).Assembly).For.Migrations())
                 .AddLogging(logging => logging.AddFluentMigratorConsole());
+
+            services.AddSingleton<IVersionTableMetaData, CustomVersionTableMetaData>();
 
             return services;
         }

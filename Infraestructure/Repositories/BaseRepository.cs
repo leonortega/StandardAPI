@@ -62,12 +62,12 @@ namespace StandardAPI.Infraestructure.Repositories
             if (!string.IsNullOrEmpty(cachedData))
             {
                 _logger.LogInformation("Retrieving all {EntityName} from cache.", typeof(TEntity).Name);
-                return JsonSerializer.Deserialize<IEnumerable<TEntity>>(cachedData) ?? [];
+                return JsonSerializer.Deserialize<IEnumerable<TEntity>>(cachedData) ?? Array.Empty<TEntity>();
             }
 
             _logger.LogInformation("Retrieving all {EntityName} from database.", typeof(TEntity).Name);
             string tableName = typeof(TEntity).Name;
-            string sql = $"SELECT * FROM {tableName}";
+            string sql = $"SELECT * FROM \"{tableName}\"";
             var entities = await QueryAsync<TEntity>(sql);
 
             var serializedEntities = JsonSerializer.Serialize(entities);
@@ -89,7 +89,7 @@ namespace StandardAPI.Infraestructure.Repositories
 
             _logger.LogInformation("Retrieving {EntityName} with ID {Id} from database.", typeof(TEntity).Name, id);
             string tableName = typeof(TEntity).Name;
-            string sql = $"SELECT * FROM {tableName} WHERE Id = @Id";
+            string sql = $"SELECT * FROM \"{tableName}\" WHERE \"Id\" = @Id";
             var entity = (await QueryAsync<TEntity>(sql, new { Id = id })).FirstOrDefault();
 
             if (entity != null)
@@ -101,19 +101,19 @@ namespace StandardAPI.Infraestructure.Repositories
             return entity;
         }
 
-        public virtual async Task<int> AddAsync(TEntity entity)
+        public virtual async Task<Guid> AddAsync(TEntity entity)
         {
             string tableName = typeof(TEntity).Name;
             // Get the properties of the entity
             var properties = typeof(TEntity).GetProperties();
             // Construct the column names and parameter names
-            string columns = string.Join(",", properties.Select(p => $"[{p.Name}]"));
+            string columns = string.Join(",", properties.Select(p => $"\"{p.Name}\""));
             string parameters = string.Join(",", properties.Select(p => $"@{p.Name}"));
-            string sql = $"INSERT INTO {tableName} ({columns}) VALUES ({parameters}); SELECT CAST(SCOPE_IDENTITY() as int)";
+            string sql = $"INSERT INTO \"{tableName}\" ({columns}) VALUES ({parameters}) RETURNING \"Id\"";
 
             var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
             {
-                return await ExecuteScalarAsync<int>(sql, entity);
+                return await ExecuteScalarAsync<Guid>(sql, entity);
             });
 
             // Invalidate cache after adding a new entity
@@ -129,8 +129,8 @@ namespace StandardAPI.Infraestructure.Repositories
             // Get the properties of the entity
             var properties = typeof(TEntity).GetProperties();
             // Construct the update set clause
-            string setClause = string.Join(",", properties.Select(p => $"[{p.Name}] = @{p.Name}"));
-            string sql = $"UPDATE {tableName} SET {setClause} WHERE Id = @Id";
+            string setClause = string.Join(",", properties.Select(p => $"\"{p.Name}\" = @{p.Name}"));
+            string sql = $"UPDATE \"{tableName}\" SET {setClause} WHERE \"Id\" = @Id";
 
             var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
             {
@@ -149,7 +149,7 @@ namespace StandardAPI.Infraestructure.Repositories
         public virtual async Task<int> DeleteAsync(Guid id)
         {
             string tableName = typeof(TEntity).Name;
-            string sql = $"DELETE FROM {tableName} WHERE Id = @Id";
+            string sql = $"DELETE FROM \"{tableName}\" WHERE \"Id\" = @Id";
 
             var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
             {

@@ -22,7 +22,7 @@ namespace StandardAPI.Infraestructure.Repositories
         {
             string sql = @"
             SELECT * 
-            FROM Products
+            FROM product
             WHERE Price >= @MinPrice AND Price <= @MaxPrice";
             return await QueryAsync<Product>(sql, new { MinPrice = minPrice, MaxPrice = maxPrice });
         }

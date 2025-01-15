@@ -8,7 +8,6 @@ using StackExchange.Redis;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Repositories;
-using StandardAPI.Infraestructure.Services;
 using StandardAPI.Infraestructure.Settings;
 
 namespace StandardAPI.Infraestructure.Extensions
@@ -48,9 +47,6 @@ namespace StandardAPI.Infraestructure.Extensions
                 options.ConfigurationOptions = ConfigurationOptions.Parse(redisSettings.ConnectionString!);
             });
             
-            services.AddScoped<Func<IDistributedCache>>(sp => () => sp.GetRequiredService<RedisCacheService>());
-            services.AddScoped<IDistributedCache, RedisCacheService>();
-
             return services;
         }
 

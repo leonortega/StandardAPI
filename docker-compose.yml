@@ -1,29 +1,29 @@
 services:
-  # standardapi.api:
-  #   image: ${DOCKER_REGISTRY-}standardapi
-  #   build:
-  #     context: .
-  #     dockerfile: StandardAPI/Dockerfile
-  #   ports:
-  #     - "5000:8080"
-  #     - "5001:8081"
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #     - ConnectionStrings__DefaultConnection=Host=cockroachdb;Port=26257;Database=defaultdb;Username=root;SslMode=Disable
-  #     - Redis__ConnectionString=redis:6379
-  #   depends_on:
-  #     - cockroachdb
-  #     - redis
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3 
-  #   volumes:
-  #     - logs:/app/logs # Mount a volume for logs
-  #   networks:
-  #     app-network:
-  #       ipv4_address: 192.168.1.100
+  standardapi.api:
+    image: ${DOCKER_REGISTRY-}standardapi
+    build:
+      context: .
+      dockerfile: StandardAPI/Dockerfile
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=cockroachdb;Port=26257;Database=defaultdb;Username=root;SslMode=Disable;Search Path=demo
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      - cockroachdb
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3 
+    volumes:
+      - logs:/app/logs # Mount a volume for logs
+    networks:
+      app-network:
+        ipv4_address: 192.168.1.100
         
   redis:
     image: redis:latest
@@ -52,7 +52,7 @@ services:
         ipv4_address: 192.168.1.102
 
 volumes:
-  # logs: # Volume for logs
+  logs: # Volume for logs
   redisdata: # Volume for Redis data
   crdb_data: # Volume for CRRB data
   
