@@ -27,6 +27,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Infraestructure.Migrations", "Migrations\StandardAPI.Infraestructure.Migrations\StandardAPI.Infraestructure.Migrations.csproj", "{14CDAD5A-1953-40C2-821B-15CDDC5C426C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,5 +70,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AC48457A-5DCF-48B9-B8C5-AA43708DCEDA} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
+		{00C1D1A5-5400-4508-BC93-214F8A8F93E3} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
 	EndGlobalSection
 EndGlobal
