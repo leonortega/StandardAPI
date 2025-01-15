@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Domain", "Domai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Shared", "Shared\StandardAPI.Shared.csproj", "{3D1F08C3-BE3B-4D8A-9B1E-1DC19EF0FD2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Application", "Application\StandardAPI.Application.csproj", "{00C1D1A5-5400-4508-BC93-214F8A8F93E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Application", "src\Application\StandardAPI.Application.csproj", "{00C1D1A5-5400-4508-BC93-214F8A8F93E3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{93C8F492-7E4F-4877-BBC3-A2CC5B045433}"
 	ProjectSection(SolutionItems) = preProject
