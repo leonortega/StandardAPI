@@ -13,16 +13,17 @@ services:
       - Redis__DefaultCacheExpiryMinutes=10
       - Polly__RetryCount=3
       - Polly__RetryIntervalInSeconds=2
-      - Polly__CircuitBreakerDurationInSeconds=5
+      - Polly__CircuitBreakerDurationInSeconds=30
       - Polly__CircuitBreakerExceptionsAllowedBeforeBreaking=2
     depends_on:
       - cockroachdb
       - redis
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3 
+      test: ["CMD-SHELL", "curl -f --insecure https://localhost:8081/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     volumes:
       - logs:/app/logs # Mount a volume for logs
     networks:

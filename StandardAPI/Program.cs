@@ -1,4 +1,7 @@
 using FluentMigrator.Runner;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using StandardAPI.API.Middleware;
 using StandardAPI.Application.Extensions;
@@ -13,7 +16,6 @@ builder.Host.UseSerilog((context, config) =>
     config.ReadFrom.Configuration(context.Configuration);
 });
 
-
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -22,13 +24,14 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
 builder.Services.AddHealthChecks()
-    .AddRedis(builder.Configuration["Redis:ConnectionString"]!) // Check Redis
+    .AddRedis(builder.Configuration["Redis:ConnectionString"]!, name: "Redis", failureStatus: HealthStatus.Degraded) // Check Redis
     .AddNpgSql( // Check CRDB
         connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
         name: "CockroachDB",
         healthQuery: "SELECT 1;", // Simple health check query
-        timeout: TimeSpan.FromSeconds(10)
-    );
+        timeout: TimeSpan.FromSeconds(10),
+        failureStatus: HealthStatus.Degraded)
+    .AddCheck("Self", () => HealthCheckResult.Healthy());
 
 builder.Services.AddMigrationRunner(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
@@ -52,7 +55,12 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map health check endpoint
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+
 
 // Run migrations on startup
 using (var scope = app.Services.CreateScope())
