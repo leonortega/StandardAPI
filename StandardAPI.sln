@@ -5,13 +5,13 @@ VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.API", "src\StandardAPI\StandardAPI.API.csproj", "{AC48457A-5DCF-48B9-B8C5-AA43708DCEDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Infraestructure", "Infraestructure\StandardAPI.Infraestructure.csproj", "{545B66BB-F572-4E75-A9EE-EAEFB38C9D44}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Infraestructure", "src\Infraestructure\StandardAPI.Infraestructure.csproj", "{545B66BB-F572-4E75-A9EE-EAEFB38C9D44}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Test", "Test\StandardAPI.Test.csproj", "{14AEF5B0-8D94-47F6-8507-CBE0D20732BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Test", "test\StandardAPI.Test.csproj", "{14AEF5B0-8D94-47F6-8507-CBE0D20732BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Domain", "Domain\StandardAPI.Domain.csproj", "{79AA29D4-5B5F-4AAA-8A49-AB0A44A2BD2D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Domain", "src\Domain\StandardAPI.Domain.csproj", "{79AA29D4-5B5F-4AAA-8A49-AB0A44A2BD2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Shared", "Shared\StandardAPI.Shared.csproj", "{3D1F08C3-BE3B-4D8A-9B1E-1DC19EF0FD2C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Shared", "src\Shared\StandardAPI.Shared.csproj", "{3D1F08C3-BE3B-4D8A-9B1E-1DC19EF0FD2C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Application", "src\Application\StandardAPI.Application.csproj", "{00C1D1A5-5400-4508-BC93-214F8A8F93E3}"
 EndProject
@@ -25,9 +25,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{36CBC380-23D9-4318-92F9-7A81B760EF7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Infraestructure.Migrations", "Migrations\StandardAPI.Infraestructure.Migrations\StandardAPI.Infraestructure.Migrations.csproj", "{14CDAD5A-1953-40C2-821B-15CDDC5C426C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Infraestructure.Migrations", "src\Migrations\StandardAPI.Infraestructure.Migrations\StandardAPI.Infraestructure.Migrations.csproj", "{14CDAD5A-1953-40C2-821B-15CDDC5C426C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7395E816-6750-40CC-B0ED-D831D119F567}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +75,11 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{AC48457A-5DCF-48B9-B8C5-AA43708DCEDA} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
+		{545B66BB-F572-4E75-A9EE-EAEFB38C9D44} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
+		{14AEF5B0-8D94-47F6-8507-CBE0D20732BD} = {7395E816-6750-40CC-B0ED-D831D119F567}
+		{79AA29D4-5B5F-4AAA-8A49-AB0A44A2BD2D} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
+		{3D1F08C3-BE3B-4D8A-9B1E-1DC19EF0FD2C} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
 		{00C1D1A5-5400-4508-BC93-214F8A8F93E3} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
+		{14CDAD5A-1953-40C2-821B-15CDDC5C426C} = {1EEF9641-CDC7-44DC-B4BC-2CD8808FCB1A}
 	EndGlobalSection
 EndGlobal
