@@ -27,7 +27,7 @@ builder.Services.AddHealthChecks()
         connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
         name: "CockroachDB",
         healthQuery: "SELECT 1;", // Simple health check query
-        timeout: TimeSpan.FromSeconds(30)
+        timeout: TimeSpan.FromSeconds(10)
     );
 
 builder.Services.AddMigrationRunner(builder.Configuration.GetConnectionString("DefaultConnection")!);

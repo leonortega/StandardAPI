@@ -32,26 +32,42 @@ namespace StandardAPI.Infraestructure.Repositories
 
         private async Task<T?> ExecuteScalarAsync<T>(string sql, object? param = null)
         {
-            return await _retryPolicy.ExecuteAsync(async () =>
+            try
             {
-                using (var connection = new NpgsqlConnection(_connectionString))
+                return await _retryPolicy.ExecuteAsync(async () =>
                 {
-                    await connection.OpenAsync();
-                    return await connection.ExecuteScalarAsync<T>(sql, param);
-                }
-            });
+                    using (var connection = new NpgsqlConnection(_connectionString))
+                    {
+                        await connection.OpenAsync();
+                        return await connection.ExecuteScalarAsync<T>(sql, param);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while executing scalar query");
+                throw;
+            }
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null)
         {
-            return await _retryPolicy.ExecuteAsync(async () =>
+            try
             {
-                using (var connection = new NpgsqlConnection(_connectionString))
+                return await _retryPolicy.ExecuteAsync(async () =>
                 {
-                    await connection.OpenAsync();
-                    return await connection.QueryAsync<T>(sql, param);
-                }
-            });
+                    using (var connection = new NpgsqlConnection(_connectionString))
+                    {
+                        await connection.OpenAsync();
+                        return await connection.QueryAsync<T>(sql, param);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while executing query");
+                throw;
+            }
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
