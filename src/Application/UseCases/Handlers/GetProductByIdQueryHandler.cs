@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using StandardAPI.Application.DTOs;
-using StandardAPI.Application.Mappers;
+using StandardAPI.Application.Interfaces;
 using StandardAPI.Application.UseCases.Queries;
 using StandardAPI.Domain.Interfaces;
 
@@ -10,12 +10,12 @@ namespace StandardAPI.Application.UseCases.Handlers
     public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, ProductDto?>
     {
         private readonly IProductRepository _repository;
-        private readonly ProductMapper _mapper;
+        private readonly IProductMapper _mapper;
         private readonly ILogger<GetProductByIdQueryHandler> _logger;
 
         public GetProductByIdQueryHandler(
             IProductRepository repository,
-            ProductMapper mapper,
+            IProductMapper mapper,
             ILogger<GetProductByIdQueryHandler> logger)
         {
             _repository = repository;
@@ -23,7 +23,7 @@ namespace StandardAPI.Application.UseCases.Handlers
             _logger = logger;
         }
 
-        public async Task<ProductDto?> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ProductDto?> Handle(GetProductByIdQuery? request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 

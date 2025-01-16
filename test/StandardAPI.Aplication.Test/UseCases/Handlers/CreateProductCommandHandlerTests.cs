@@ -6,7 +6,7 @@ using StandardAPI.Application.UseCases.Handlers;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
 
-namespace StandardAPI.Application.UseCases.Tests.Handlers
+namespace StandardAPI.Aplication.Test.UseCases.Handlers
 {
     public class CreateProductCommandHandlerTests
     {
