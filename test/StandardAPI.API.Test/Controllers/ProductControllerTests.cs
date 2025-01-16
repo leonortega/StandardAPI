@@ -5,9 +5,8 @@ using StandardAPI.API.Controllers;
 using StandardAPI.Application.DTOs;
 using StandardAPI.Application.UseCases.Commands;
 using StandardAPI.Application.UseCases.Queries;
-using Xunit;
 
-namespace StandardAPI.API.Tests.Controllers
+namespace StandardAPI.API.Test.Controllers
 {
     public class ProductControllerTests
     {

@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
+using StandardAPI.Application.Interfaces;
 using StandardAPI.Application.Mappers;
 using StandardAPI.Application.UseCases.Commands;
 using StandardAPI.Application.UseCases.Queries;
@@ -16,6 +16,7 @@ namespace StandardAPI.Application.Extensions
         {
             //Mappers
             services.AddSingleton<ProductMapper>();
+            services.AddSingleton<IProductMapper, ProductMapper>();
 
             //Validations
             services.AddFluentValidationAutoValidation();
