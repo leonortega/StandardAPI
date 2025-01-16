@@ -50,7 +50,7 @@ namespace StandardAPI.Infraestructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null)
+        public async virtual Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null)
         {
             try
             {
