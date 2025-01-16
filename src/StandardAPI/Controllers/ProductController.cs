@@ -8,11 +8,11 @@ namespace StandardAPI.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ProductsController(IMediator mediator)
+        public ProductController(IMediator mediator)
         {
             _mediator = mediator;
         }
