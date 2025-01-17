@@ -1,7 +1,9 @@
+using Asp.Versioning;
 using FluentMigrator.Runner;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using StandardAPI.API.Middleware;
 using StandardAPI.Application.Extensions;
@@ -19,10 +21,50 @@ builder.Host.UseSerilog((context, config) =>
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
+// Add API versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+}).AddMvc().AddApiExplorer(options =>
+{
+    // Format the version as "'v'major[.minor]"
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
+builder.Services.AddEndpointsApiExplorer();
+
+// Add Swagger
+builder.Services.AddSwaggerGen(options =>
+{
+    // Add a JWT security definition for Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// Add health checks
 builder.Services.AddHealthChecks()
     .AddRedis(builder.Configuration["Redis:ConnectionString"]!, name: "Redis", failureStatus: HealthStatus.Degraded) // Check Redis
     .AddNpgSql( // Check CRDB
@@ -33,6 +75,7 @@ builder.Services.AddHealthChecks()
         failureStatus: HealthStatus.Degraded)
     .AddCheck("Self", () => HealthCheckResult.Healthy());
 
+// Add Migration Runner
 builder.Services.AddMigrationRunner(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
 var app = builder.Build();
@@ -40,6 +83,7 @@ var app = builder.Build();
 // Enable Serilog request logging
 app.UseSerilogRequestLogging();
 
+// Add Middlewares
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<RateLimitMiddleware>();

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using StandardAPI.Application.DTOs;
 using StandardAPI.Application.UseCases.Commands;
@@ -7,7 +8,8 @@ using StandardAPI.Application.UseCases.Queries;
 namespace StandardAPI.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class ProductController : ControllerBase
     {
         private readonly IMediator _mediator;
