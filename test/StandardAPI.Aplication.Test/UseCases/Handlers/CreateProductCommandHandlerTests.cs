@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
 using StandardAPI.Application.DTOs;
 using StandardAPI.Application.Interfaces;
 using StandardAPI.Application.UseCases.Commands;
@@ -13,12 +14,15 @@ namespace StandardAPI.Aplication.Test.UseCases.Handlers
         private readonly Mock<IProductRepository> _repositoryMock;
         private readonly Mock<IProductMapper> _mapperMock;
         private readonly CreateProductCommandHandler _handler;
+        private readonly Mock<ILogger<CreateProductCommandHandler>> _loggerMock;
 
         public CreateProductCommandHandlerTests()
         {
             _repositoryMock = new Mock<IProductRepository>();
             _mapperMock = new Mock<IProductMapper>();
-            _handler = new CreateProductCommandHandler(_repositoryMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<CreateProductCommandHandler>>();
+            _handler = new CreateProductCommandHandler(_repositoryMock.Object, _mapperMock.Object, _loggerMock.Object);
+            
         }
 
         [Fact]
