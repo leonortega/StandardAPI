@@ -1,4 +1,4 @@
-﻿namespace StandardAPI.Infraestructure.Settings
+﻿namespace StandardAPI.Shared.Settings
 {
     public class RedisSettings
     {

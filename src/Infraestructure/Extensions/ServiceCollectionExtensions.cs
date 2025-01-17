@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.CircuitBreaker;
@@ -8,7 +7,8 @@ using StackExchange.Redis;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Repositories;
-using StandardAPI.Infraestructure.Settings;
+
+using StandardAPI.Shared.Settings;
 
 namespace StandardAPI.Infraestructure.Extensions
 {
@@ -46,7 +46,7 @@ namespace StandardAPI.Infraestructure.Extensions
             {
                 options.ConfigurationOptions = ConfigurationOptions.Parse(redisSettings.ConnectionString!);
             });
-            
+
             return services;
         }
 

@@ -42,6 +42,7 @@ app.UseSerilogRequestLogging();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RateLimitMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

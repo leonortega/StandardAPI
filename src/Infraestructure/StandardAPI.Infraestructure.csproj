@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\StandardAPI.Domain.csproj" />
+    <ProjectReference Include="..\Shared\StandardAPI.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
