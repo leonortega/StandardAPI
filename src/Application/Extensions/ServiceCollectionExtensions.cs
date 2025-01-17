@@ -22,10 +22,18 @@ namespace StandardAPI.Application.Extensions
             services.AddFluentValidationAutoValidation();
             services.AddFluentValidationClientsideAdapters();
             services.AddValidatorsFromAssemblyContaining<CreateProductCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<DeleteProductCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<GetProductByIdQueryValidator>();
+            services.AddValidatorsFromAssemblyContaining<GetProductsByPriceRangeQueryValidator>();
+            services.AddValidatorsFromAssemblyContaining<UpdateProductCommandValidator>();
 
             // MediatR
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DeleteProductCommand).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateProductCommand).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllProductsQuery).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetProductByIdQuery).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetProductsByPriceRangeQuery).Assembly));
 
             return services;
         }
