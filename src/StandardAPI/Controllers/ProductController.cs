@@ -25,11 +25,49 @@ namespace StandardAPI.API.Controllers
             return Ok(productId);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductCommandDto dto)
+        {
+            if (id != dto?.Id)
+            {
+                return BadRequest("Product ID mismatch.");
+            }
+
+            var command = new UpdateProductCommand { Dto = dto };
+            var result = await _mediator.Send(command);
+            return result > 0 ? Ok() : NotFound();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var command = new DeleteProductCommand { Id = id };
+            var result = await _mediator.Send(command);
+            return result > 0 ? Ok() : NotFound();
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetById(Guid id)
         {
-            var product = await _mediator.Send(new GetProductByIdQuery(id));
+            var query = new GetProductByIdQuery(id);
+            var product = await _mediator.Send(query);
             return product != null ? Ok(product) : NotFound();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAll()
+        {
+            var query = new GetAllProductsQuery();
+            var products = await _mediator.Send(query);
+            return products.Any() ? Ok(products) : NotFound();
+        }
+
+        [HttpGet("price-range")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetByPriceRange([FromQuery] decimal minPrice, [FromQuery] decimal maxPrice)
+        {
+            var query = new GetProductsByPriceRangeQuery { MinPrice = minPrice, MaxPrice = maxPrice };
+            var products = await _mediator.Send(query);
+            return products.Any() ? Ok(products) : NotFound();
         }
     }
 }
