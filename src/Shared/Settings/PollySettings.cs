@@ -1,4 +1,4 @@
-﻿namespace StandardAPI.Shared.Settings
+﻿namespace StandardAPI.Common.Settings
 {
     public class PollySettings
     {

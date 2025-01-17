@@ -1,6 +1,6 @@
 ﻿using Polly;
 using Polly.RateLimit;
-using StandardAPI.Shared.Settings;
+using StandardAPI.Common.Settings;
 
 namespace StandardAPI.API.Middleware
 {

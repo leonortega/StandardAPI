@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Infraestructure
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Domain", "src\Domain\StandardAPI.Domain.csproj", "{79AA29D4-5B5F-4AAA-8A49-AB0A44A2BD2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Shared", "src\Shared\StandardAPI.Shared.csproj", "{3D1F08C3-BE3B-4D8A-9B1E-1DC19EF0FD2C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Common", "src\Shared\StandardAPI.Common.csproj", "{3D1F08C3-BE3B-4D8A-9B1E-1DC19EF0FD2C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardAPI.Application", "src\Application\StandardAPI.Application.csproj", "{00C1D1A5-5400-4508-BC93-214F8A8F93E3}"
 EndProject

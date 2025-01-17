@@ -7,8 +7,7 @@ using StackExchange.Redis;
 using StandardAPI.Domain.Entities;
 using StandardAPI.Domain.Interfaces;
 using StandardAPI.Infraestructure.Repositories;
-
-using StandardAPI.Shared.Settings;
+using StandardAPI.Common.Settings;
 
 namespace StandardAPI.Infraestructure.Extensions
 {
