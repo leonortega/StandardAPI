@@ -78,7 +78,7 @@ namespace StandardAPI.Infraestructure.Repositories
             if (!string.IsNullOrEmpty(cachedData))
             {
                 _logger.LogInformation("Retrieving all {EntityName} from cache.", typeof(TEntity).Name);
-                return JsonSerializer.Deserialize<IEnumerable<TEntity>>(cachedData) ?? Array.Empty<TEntity>();
+                return JsonSerializer.Deserialize<IEnumerable<TEntity>>(cachedData) ?? [];
             }
 
             _logger.LogInformation("Retrieving all {EntityName} from database.", typeof(TEntity).Name);
@@ -86,8 +86,11 @@ namespace StandardAPI.Infraestructure.Repositories
             string sql = $"SELECT * FROM \"{tableName}\"";
             var entities = await QueryAsync<TEntity>(sql);
 
-            var serializedEntities = JsonSerializer.Serialize(entities);
-            await _cache.SetStringAsync(cacheKey, serializedEntities);
+            if (entities.Any())
+            {
+                var serializedEntities = JsonSerializer.Serialize(entities);
+                await _cache.SetStringAsync(cacheKey, serializedEntities);
+            }
 
             return entities;
         }

@@ -61,7 +61,13 @@ namespace StandardAPI.API.Controllers
         {
             var query = new GetAllProductsQuery();
             var products = await _mediator.Send(query);
-            return products.Any() ? Ok(products) : NotFound();
+
+            if (products.Any())
+            {
+                return Ok(products); 
+            }
+
+            return NoContent();
         }
 
         [HttpGet("price-range")]
@@ -69,7 +75,13 @@ namespace StandardAPI.API.Controllers
         {
             var query = new GetProductsByPriceRangeQuery { MinPrice = minPrice, MaxPrice = maxPrice };
             var products = await _mediator.Send(query);
-            return products.Any() ? Ok(products) : NotFound();
+
+            if (products.Any())
+            {
+                return Ok(products);
+            }
+
+            return NoContent();
         }
     }
 }
