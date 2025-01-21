@@ -1,0 +1,38 @@
+services:      
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    networks:
+      app-network:
+        ipv4_address: 192.168.1.101
+      
+  cockroachdb:
+    image: cockroachdb/cockroach:latest-v23.1
+    container_name: cockroachdb
+    hostname: cockroachdb
+    ports:
+      - "26257:26257" # SQL port
+      - "8080:8080"   # Admin UI port
+    command: start-single-node --insecure
+    volumes:
+      - crdb_data:/cockroach/cockroach-data
+    networks:
+      app-network:
+        ipv4_address: 192.168.1.102
+
+volumes:
+  logs: # Volume for logs
+  redisdata: # Volume for Redis data
+  crdb_data: # Volume for CRRB data
+  
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24    
