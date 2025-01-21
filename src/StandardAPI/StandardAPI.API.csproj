@@ -23,7 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\StandardAPI.Application.csproj" />
     <ProjectReference Include="..\Infraestructure\StandardAPI.Infraestructure.csproj" />
-    <ProjectReference Include="..\Migrations\StandardAPI.Infraestructure.Migrations\StandardAPI.Infraestructure.Migrations.csproj" />
+    <ProjectReference Include="..\Migrations\StandardAPI.Infraestructure.Migrations.csproj" />
     <ProjectReference Include="..\Shared\StandardAPI.Common.csproj" />
   </ItemGroup>
 
