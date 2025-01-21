@@ -24,6 +24,24 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
+
+// Add CORS
+var allowedOrigins = builder.Configuration
+    .GetSection("CORS:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SpecificOrigins",
+        builder =>
+        {
+            builder.WithOrigins(allowedOrigins)
+                   .AllowAnyHeader() // Or specify allowed headers
+                   .AllowAnyMethod(); // Or specify allowed methods (GET, POST, PUT, DELETE, etc.)
+                                      //.AllowCredentials(); // Use with caution, only if needed for cookies/authentication
+        });
+});
+
 // Add API versioning
 builder.Services.AddApiVersioning(options =>
 {
@@ -79,6 +97,9 @@ builder.Services.AddHealthChecks()
 builder.Services.AddMigrationRunner(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
 var app = builder.Build();
+
+// Use the named CORS policy
+app.UseCors("SpecificOrigins");
 
 // Enable Serilog request logging
 app.UseSerilogRequestLogging();

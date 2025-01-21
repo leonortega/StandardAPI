@@ -19,9 +19,11 @@ COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["src/StandardAPI/StandardAPI.API.csproj", "StandardAPI/"]
 COPY ["src/Application/StandardAPI.Application.csproj", "Application/"]
+COPY ["src/Shared/StandardAPI.Common.csproj", "Shared/"]
 COPY ["src/Domain/StandardAPI.Domain.csproj", "Domain/"]
 COPY ["src/Infraestructure/StandardAPI.Infraestructure.csproj", "Infraestructure/"]
-RUN dotnet restore "./src/StandardAPI/StandardAPI.API.csproj"
+COPY ["src/Migrations/StandardAPI.Infraestructure.Migrations/StandardAPI.Infraestructure.Migrations.csproj", "Migrations/StandardAPI.Infraestructure.Migrations"]
+RUN dotnet restore "./StandardAPI/StandardAPI.API.csproj"
 COPY . .
 WORKDIR "/src/StandardAPI"
 RUN dotnet build "./StandardAPI.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
