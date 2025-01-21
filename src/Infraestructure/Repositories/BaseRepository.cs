@@ -149,7 +149,7 @@ namespace StandardAPI.Infraestructure.Repositories
             var properties = typeof(TEntity).GetProperties();
             // Construct the update set clause
             string setClause = string.Join(",", properties.Select(p => $"\"{p.Name}\" = @{p.Name}"));
-            string sql = $"UPDATE \"{tableName}\" SET {setClause} WHERE \"Id\" = @Id";
+            string sql = $"WITH updated AS (UPDATE \"{tableName}\" SET {setClause} WHERE \"Id\" = @Id RETURNING *) SELECT COUNT(*) as rows_affected FROM updated";
 
             var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
             {
@@ -168,7 +168,7 @@ namespace StandardAPI.Infraestructure.Repositories
         public virtual async Task<int> DeleteAsync(Guid id)
         {
             string tableName = typeof(TEntity).Name;
-            string sql = $"DELETE FROM \"{tableName}\" WHERE \"Id\" = @Id";
+            string sql = $"WITH deleted AS (DELETE FROM \"{tableName}\" WHERE \"Id\" = @Id RETURNING *) SELECT COUNT(*) as rows_affected FROM deleted";
 
             var result = await _circuitBreakerPolicy.ExecuteAsync(async () =>
             {
