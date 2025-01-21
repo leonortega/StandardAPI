@@ -22,7 +22,7 @@ COPY ["src/Application/StandardAPI.Application.csproj", "Application/"]
 COPY ["src/Shared/StandardAPI.Common.csproj", "Shared/"]
 COPY ["src/Domain/StandardAPI.Domain.csproj", "Domain/"]
 COPY ["src/Infraestructure/StandardAPI.Infraestructure.csproj", "Infraestructure/"]
-COPY ["src/Migrations/StandardAPI.Infraestructure.Migrations/StandardAPI.Infraestructure.Migrations.csproj", "Migrations/StandardAPI.Infraestructure.Migrations"]
+COPY ["src/Migrations/StandardAPI.Infraestructure.Migrations.csproj", "Migrations/"]
 RUN dotnet restore "./StandardAPI/StandardAPI.API.csproj"
 COPY . .
 WORKDIR "/src/StandardAPI"
