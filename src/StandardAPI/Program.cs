@@ -24,6 +24,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
+// Add API versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = false;
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 // Add CORS
 var allowedOrigins = builder.Configuration
@@ -41,21 +52,6 @@ builder.Services.AddCors(options =>
                                       //.AllowCredentials(); // Use with caution, only if needed for cookies/authentication
         });
 });
-
-// Add API versioning
-builder.Services.AddApiVersioning(options =>
-{
-    options.DefaultApiVersion = new ApiVersion(1, 0);
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ReportApiVersions = true;
-}).AddMvc().AddApiExplorer(options =>
-{
-    // Format the version as "'v'major[.minor]"
-    options.GroupNameFormat = "'v'VVV";
-    options.SubstituteApiVersionInUrl = true;
-});
-
-builder.Services.AddEndpointsApiExplorer();
 
 // Add Swagger
 builder.Services.AddSwaggerGen(options =>
