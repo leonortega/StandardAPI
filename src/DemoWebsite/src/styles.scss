@@ -1,0 +1,11 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light dark;
+  @include mat.theme(( color: mat.$orange-palette, typography: Roboto, density: 0 ));
+}
+
+.error-snackbar {
+  background-color: #f44336 !important; /* Red color for errors */
+  color: white;
+}
