@@ -1,20 +1,21 @@
-.container {
-  padding: 16px;
-  max-width: 800px;
-  margin: 0 auto;
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-mat-card {
-  margin-top: 20px;
+.edit-product-card {
+  margin: 16px;
+  max-width: 600px; /* Constrain card width; adjust as preferred */
 }
 
-.button-row {
-  display: flex;
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.w-100 {
+.full-width {
   width: 100%;
   margin-bottom: 16px;
+}
+
+.actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px; /* space between buttons */
 }

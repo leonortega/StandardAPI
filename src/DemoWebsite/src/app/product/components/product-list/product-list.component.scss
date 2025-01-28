@@ -1,44 +1,35 @@
-.content-container {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+@use '@angular/material' as mat;
+
+.toolbar {
+   position: sticky; 
+   top: 0; 
+   z-index: 1000; 
 }
 
-.header-container {
+.product-list-card {
+  margin: 16px;
+  display: block;
+  /* Just an example to constrain the maximum width; remove or adjust as needed */
+  //max-width: 1000px;
+}
+
+.actions {
+  margin-bottom: 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  justify-content: flex-end; /* Right-align the button */
 }
 
-.table-container {
-  border-radius: 8px;
-  overflow: hidden;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.mat-mdc-table {
+table {
   width: 100%;
+  margin-bottom: 16px;
 }
 
-.actions-cell {
-  width: 120px;
+.mat-header-cell,
+.mat-cell {
+  padding: 8px;
 }
 
-.action-button {
-  margin: 0 4px;
-}
-
-.price-cell {
-  font-weight: 500;
-}
-
-.mat-mdc-row:hover {
-  background: #f5f5f5;
-}
-
-// Style the paginator to match the table
-::ng-deep .mat-mdc-paginator {
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+.mat-paginator {
+  /* Add some top spacing so it doesn’t butt up directly against the table */
+  margin-top: 8px;
 }
