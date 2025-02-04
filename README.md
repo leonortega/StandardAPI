@@ -51,56 +51,31 @@ There are multiple ways to run the StandardAPI application:
 
 ### Running Locally
 
-1. **Clone the Repository**: Clone the repository to your local machine.
-
-```
-git clone https://github.com/leonortega/StandardAPI.git
-cd StandardAPI
-```
-
-2. **Install Dependencies**: Ensure you have .NET 8 SDK installed on your machine. Restore the dependencies using the following command:
-
-```
-dotnet restore
-```
-
-3. **Update Configuration**: Update the `appsettings.json` file with the necessary configuration settings, such as connection strings for CockroachDB and Redis.
-
-4. **Run the Application**: Use the following command to run the application:
-
-```
-dotnet run --project StandardAPI
-```
-
-5. **Access the Application**: The application will be available at `https://localhost:5001` and the Swagger UI at `https://localhost:5001/swagger`.
-
 ### Running with Docker
 
 1. **Install Docker**: Ensure Docker is installed and running on your machine.
 
-2. **Build Docker Images**: Use Docker Compose to build the images and start the containers.
-
-```
-docker-compose build
-```
-
-3. **Start the Containers**: Use Docker Compose to start the containers.
+2. **Start the Containers**: In the docker-compose file folder, use Docker Compose to start the containers.
 
 ```
 docker-compose up
 ```
 
-4. **Access the Application**: The application will be available at `http://localhost:5000` and the Swagger UI at `http://localhost:5000/swagger`.
+3. **Access the Application**: The application will be available at `http://localhost:5000` and the Swagger UI at `http://localhost:5000/swagger`.
+
+4. **Access the Site**: The site will be available at `http://localhost:5002`
 
 ### Running with Visual Studio
 
 1. **Open the Solution**: Open the `StandardAPI.sln` solution file in Visual Studio.
 
-2. **Set Startup Project**: Set `StandardAPI` as the startup project.
+2. **Set Startup Item**: Set `docker-compose` as the startup item.
 
 3. **Run the Application**: Press `F5` to build and run the application.
 
-4. **Access the Application**: The application will be available at `https://localhost:5001` and the Swagger UI at `https://localhost:5001/swagger`.
+4. **Access the Application**: The application will be available at `http://localhost:5000` and the Swagger UI at `http://localhost:5000/swagger`.
+
+5. **Access the Site**: The site will be available at `http://localhost:5002`
 
 ## Conclusion
 
