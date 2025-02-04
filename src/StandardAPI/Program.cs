@@ -37,19 +37,14 @@ builder.Services.AddApiVersioning(options =>
 });
 
 // Add CORS
-var allowedOrigins = builder.Configuration
-    .GetSection("CORS:AllowedOrigins")
-    .Get<string[]>() ?? [];
-
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("SpecificOrigins",
-        builder =>
+    options.AddPolicy("AllowAll",
+        policy =>
         {
-            builder.WithOrigins(allowedOrigins)
-                   .AllowAnyHeader() // Or specify allowed headers
-                   .AllowAnyMethod(); // Or specify allowed methods (GET, POST, PUT, DELETE, etc.)
-                                      //.AllowCredentials(); // Use with caution, only if needed for cookies/authentication
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
         });
 });
 
@@ -95,7 +90,7 @@ builder.Services.AddMigrationRunner(builder.Configuration.GetConnectionString("D
 var app = builder.Build();
 
 // Use the named CORS policy
-app.UseCors("SpecificOrigins");
+app.UseCors("AllowAll");
 
 // Enable Serilog request logging
 app.UseSerilogRequestLogging();
@@ -112,7 +107,6 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 

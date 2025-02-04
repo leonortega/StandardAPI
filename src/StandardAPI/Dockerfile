@@ -17,15 +17,15 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
-COPY ["src/StandardAPI/StandardAPI.API.csproj", "StandardAPI/"]
-COPY ["src/Application/StandardAPI.Application.csproj", "Application/"]
-COPY ["src/Shared/StandardAPI.Common.csproj", "Shared/"]
-COPY ["src/Domain/StandardAPI.Domain.csproj", "Domain/"]
-COPY ["src/Infraestructure/StandardAPI.Infraestructure.csproj", "Infraestructure/"]
-COPY ["src/Migrations/StandardAPI.Infraestructure.Migrations.csproj", "Migrations/"]
-RUN dotnet restore "./StandardAPI/StandardAPI.API.csproj"
+COPY ["src/StandardAPI/StandardAPI.API.csproj", "src/StandardAPI/"]
+COPY ["src/Application/StandardAPI.Application.csproj", "src/Application/"]
+COPY ["src/Domain/StandardAPI.Domain.csproj", "src/Domain/"]
+COPY ["src/Infraestructure/StandardAPI.Infraestructure.csproj", "src/Infraestructure/"]
+COPY ["src/Shared/StandardAPI.Common.csproj", "src/Shared/"]
+COPY ["src/Migrations/StandardAPI.Infraestructure.Migrations.csproj", "src/Migrations/"]
+RUN dotnet restore "./src/StandardAPI/StandardAPI.API.csproj"
 COPY . .
-WORKDIR "/src/StandardAPI"
+WORKDIR "/src/src/StandardAPI"
 RUN dotnet build "./StandardAPI.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
