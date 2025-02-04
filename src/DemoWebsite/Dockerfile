@@ -22,4 +22,4 @@ EXPOSE 57391
 
 # Run ng serve on container startup. 
 # Host 0.0.0.0 ensures the server is accessible outside the container.
-CMD ["ng", "serve", "--host", "0.0.0.0", "--port", "57391", "--proxy-config", "proxy.conf.json"]]
+CMD ["ng", "serve", "--host", "0.0.0.0", "--port", "57391"]]
