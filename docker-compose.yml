@@ -6,7 +6,6 @@ services:
       dockerfile: src/StandardAPI/Dockerfile
     ports:
       - "5000:8080"
-      - "5001:8081"
     environment:
       - ConnectionStrings__DefaultConnection=Host=cockroachdb;Port=26257;Database=defaultdb;Username=root;SslMode=Disable;Search Path=demo
       - Redis__ConnectionString=redis:6379
