@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Product } from '../../../models/product.model';
@@ -10,6 +10,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -23,21 +24,22 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
     MatButtonModule,
     MatIconModule,
     MatPaginatorModule,
-  ], // so we can use *ngFor, routerLink, etc.
+  ],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss']
 })
-export class ProductListComponent implements OnInit, AfterViewInit {
+export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
   displayedColumns: string[] = ['id', 'name', 'price', 'description', 'actions'];
+  products: Product[] = [];
+  displayedProducts: Product[] = [];
 
-  products: Product[] = [];           // Full array of products
-  displayedProducts: Product[] = [];  // Slice of products for the current page
-
-  // Paginator settings
   pageSizeOptions: number[] = [5, 10, 25];
-  pageSize = 5;      // Default page size
-  pageIndex = 0;     // Default page index
+  pageSize = 5;
+  pageIndex = 0;
+
+  private paginatorSubscription!: Subscription;
 
   constructor(private productService: ProductService) { }
 
@@ -46,21 +48,23 @@ export class ProductListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Subscribe to paginator changes
-    this.paginator.page.subscribe((event: PageEvent) => {
-      // Update pageSize and pageIndex from the event
+    this.paginatorSubscription = this.paginator.page.subscribe((event: PageEvent) => {
       this.pageSize = event.pageSize;
       this.pageIndex = event.pageIndex;
-
-      // Update the displayedProducts slice
       this.updateDisplayedProducts();
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.paginatorSubscription) {
+      this.paginatorSubscription.unsubscribe();
+    }
   }
 
   fetchProducts(): void {
     this.productService.getAll().subscribe({
       next: (data) => {
-        this.products = data;
+        this.products = data.sort((a, b) => a.name.localeCompare(b.name)); // Sort by name
         this.updateDisplayedProducts();
       },
       error: (err) => {
@@ -69,9 +73,6 @@ export class ProductListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  /**
- * Slice the products array based on the current pageIndex and pageSize.
- */
   updateDisplayedProducts(): void {
     const startIndex = this.pageIndex * this.pageSize;
     const endIndex = startIndex + this.pageSize;
@@ -83,6 +84,13 @@ export class ProductListComponent implements OnInit, AfterViewInit {
       this.productService.delete(id).subscribe({
         next: () => {
           this.products = this.products.filter(product => product.id !== id);
+          this.products.sort((a, b) => a.name.localeCompare(b.name)); // Re-sort after deletion
+
+          if (this.pageIndex > 0 && this.products.length <= this.pageIndex * this.pageSize) {
+            this.pageIndex--; // Adjust pageIndex if necessary
+          }
+
+          this.updateDisplayedProducts();
         },
         error: (err) => {
           console.error('Error deleting product:', err);
