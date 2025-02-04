@@ -1,6 +1,6 @@
 services:
   standardapi.api:
-    image: ${DOCKER_REGISTRY-}standardapi
+    image: standardapi
     build:
       context: .
       dockerfile: src/StandardAPI/Dockerfile
@@ -15,7 +15,7 @@ services:
       - Polly__RetryIntervalInSeconds=2
       - Polly__CircuitBreakerDurationInSeconds=30
       - Polly__CircuitBreakerExceptionsAllowedBeforeBreaking=2
-      - Polly__RateLimitMaxRequest=20
+      - Polly__RateLimitMaxRequest=1000
       - Polly__RateLimitTimeWindowInSeconds=1
     depends_on:
       - cockroachdb
@@ -57,6 +57,20 @@ services:
     networks:
       app-network:
         ipv4_address: 192.168.1.102
+
+  demowebsite:
+    image: demowebsite
+    container_name: demowebsite
+    build:
+      context: .
+      dockerfile: src/DemoWebsite/Dockerfile
+    ports:
+      - "5002:57391"
+    depends_on:
+      - standardapi.api
+    networks:
+      app-network:
+        ipv4_address: 192.168.1.103
 
 volumes:
   logs: # Volume for logs
