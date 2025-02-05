@@ -85,5 +85,5 @@ docker-compose up
 
 ## Conclusion
 
-The technologies chosen for the StandardAPI solution are selected based on their performance, reliability, scalability, and ease of use. They provide a solid foundation for building a modern, high-performance API that can handle the demands of today's applications. By leveraging these technologies, we ensure that the StandardAPI is robust, maintainable, and ready for future growth.
+It is possible to create any application just using the code provided by the AIs, and as a programmer, define the guidelines and the functionality of the code. The quality of the code and the time invested in this process could have been optimized by taking into account better practices in the writing of prompts, although some concepts were learned with the use of each AI. Final note: All the resulting code is subject to improvement and some implementations have better ways to be solved, e.g. dependency injections.
 
