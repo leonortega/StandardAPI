@@ -1,8 +1,14 @@
 # StandardAPI
 
-## Overview
+## Goals
+This solution composed of a REST API and a website in Angular, is the result of an experiment where:
+- As a developer. use different AI (Gemini, Claude, ChatGPT, etc) to create the applications and without entering a line of code.
+- Apply best practices (Clean Architecture, DDD, SOLID, etc) and add as many libraries as possible (listed below).
+- You get applications that work, they are not the most optimal or with the best code.
 
-StandardAPI is a robust and scalable API solution built using modern technologies to ensure high performance, reliability, and maintainability. This document provides an overview of the technologies used in this solution and the rationale behind their selection.
+## Overview
+- StandardAPI is a robust and scalable API solution built using modern technologies to ensure high performance, reliability, and maintainability. This document provides an overview of the technologies used in this solution and the rationale behind their selection.
+- DemoWebsite is a simple website that consumes the StandardAPI to demonstrate how to interact with the API using a web application.
 
 ## Technologies Used
 
@@ -69,7 +75,7 @@ docker-compose up
 
 1. **Open the Solution**: Open the `StandardAPI.sln` solution file in Visual Studio.
 
-2. **Set Startup Item**: Set `docker-compose` as the startup item.
+2. **Set Startup project**: Set `docker-compose` as the startup project.
 
 3. **Run the Application**: Press `F5` to build and run the application.
 
